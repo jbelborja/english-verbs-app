@@ -1,14 +1,14 @@
 import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
-// TODO: Replace with your actual Firebase configuration
+// Firebase configuration for english-verbs-app
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyAEJ9Xe4DjXa2wiwlrz-S9RB5LXMzKSFFI",
+    authDomain: "english-verbs-app.firebaseapp.com",
+    projectId: "english-verbs-app",
+    storageBucket: "english-verbs-app.firebasestorage.app",
+    messagingSenderId: "364645965860",
+    appId: "1:364645965860:web:c675335423acb4b64f78b1"
 };
 
 // Initialize Firebase

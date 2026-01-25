@@ -11,12 +11,11 @@ WebBrowser.maybeCompleteAuthSession();
 export default function LoginScreen() {
     const { signInAnonymously, signInWithGoogleCredential, loading } = useAuth();
 
-    // TODO: Add your Google Client IDs here
-    // Check documentation or implementation plan regarding where to get these
     const [request, response, promptAsync] = Google.useAuthRequest({
+        androidClientId: '364645965860-sjietr9u3dcdvt8ieecekga0jp7ul37g.apps.googleusercontent.com',
+        // For iOS, you'll need to add an iOS app in Firebase Console and get the iOS client ID
         // iosClientId: 'YOUR_IOS_CLIENT_ID',
-        // androidClientId: 'YOUR_ANDROID_CLIENT_ID',
-        // webClientId: 'YOUR_WEB_CLIENT_ID',
+        webClientId: '364645965860-sjietr9u3dcdvt8ieecekga0jp7ul37g.apps.googleusercontent.com',
         redirectUri: makeRedirectUri({
             scheme: 'englishverbsapp'
         })
@@ -40,7 +39,7 @@ export default function LoginScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>English Verbs Quiz</Text>
+            <Text style={styles.title}>Quiz de Verbos en Inglés</Text>
 
             <View style={styles.buttonContainer}>
                 <TouchableOpacity
@@ -48,14 +47,14 @@ export default function LoginScreen() {
                     onPress={() => promptAsync()}
                     disabled={!request}
                 >
-                    <Text style={styles.buttonText}>Sign in with Google</Text>
+                    <Text style={styles.buttonText}>Iniciar sesión con Google</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={[styles.button, styles.anonymousButton]}
                     onPress={() => signInAnonymously()}
                 >
-                    <Text style={styles.buttonText}>Continue Anonymously</Text>
+                    <Text style={styles.buttonText}>Continuar Anónimamente</Text>
                 </TouchableOpacity>
             </View>
         </View>

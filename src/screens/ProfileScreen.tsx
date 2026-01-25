@@ -21,17 +21,17 @@ export default function ProfileScreen() {
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.email}>
-                    {user?.isAnonymous ? 'Anonymous User' : user?.email}
+                    {user?.isAnonymous ? 'Usuario Anónimo' : user?.email}
                 </Text>
                 <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-                    <Text style={styles.logoutText}>Logout</Text>
+                    <Text style={styles.logoutText}>Cerrar Sesión</Text>
                 </TouchableOpacity>
             </View>
 
-            <Text style={styles.sectionTitle}>Session History</Text>
+            <Text style={styles.sectionTitle}>Historial de Sesión</Text>
 
             {history.length === 0 ? (
-                <Text style={styles.emptyText}>No quizzes taken in this session.</Text>
+                <Text style={styles.emptyText}>No se han realizado ejercicios en esta sesión.</Text>
             ) : (
                 <FlatList
                     data={history}
