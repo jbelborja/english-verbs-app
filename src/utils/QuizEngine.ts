@@ -78,11 +78,16 @@ export class QuizEngine {
     // Check the answer
     checkAnswer(question: Question, userAnswer: string): boolean {
         const correctAnswer = question.verb[question.answerField];
-
-        // Handle multiple possibilities (e.g., "was/were", "learned/learnt")
-        const validAnswers = correctAnswer.split('/').map(a => a.trim().toLowerCase());
         const normalizedUserAnswer = userAnswer.trim().toLowerCase();
+        const normalizedCorrectAnswer = correctAnswer.trim().toLowerCase();
 
+        // 1. Check if it matches the full string (including /)
+        if (normalizedUserAnswer === normalizedCorrectAnswer) {
+            return true;
+        }
+
+        // 2. Check if it matches any of the parts separated by /
+        const validAnswers = correctAnswer.split('/').map(a => a.trim().toLowerCase());
         return validAnswers.includes(normalizedUserAnswer);
     }
 

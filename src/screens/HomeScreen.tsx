@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 
+import { theme } from '../styles/theme';
+
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 type Props = {
@@ -12,30 +14,41 @@ type Props = {
 export default function HomeScreen({ navigation }: Props) {
     return (
         <View style={styles.container}>
-            <TouchableOpacity
-                style={styles.profileButton}
-                onPress={() => navigation.navigate('Profile')}
-            >
-                <Text style={styles.profileButtonText}>Ver Perfil</Text>
-            </TouchableOpacity>
+            <View style={styles.header}>
+                <Text style={styles.title}>Práctica de Verbos</Text>
+                <Text style={styles.subtitle}>Selecciona un modo para comenzar a practicar</Text>
+            </View>
 
-            <Text style={styles.title}>Práctica de Verbos (English)</Text>
-            <Text style={styles.subtitle}>Domina los verbos irregulares</Text>
-
-            <View style={styles.buttonContainer}>
+            <View style={styles.cardContainer}>
                 <TouchableOpacity
-                    style={styles.button}
+                    style={styles.card}
                     onPress={() => navigation.navigate('Quiz', { mode: 'typed' })}
                 >
-                    <Text style={styles.buttonText}>Modo Escribir</Text>
+                    <View style={[styles.iconContainer, { backgroundColor: '#EEF2FF' }]}>
+                        <Text style={styles.cardIcon}>✍️</Text>
+                    </View>
+                    <View style={styles.cardContent}>
+                        <Text style={styles.cardTitle}>Modo Escribir</Text>
+                        <Text style={styles.cardDescription}>Escribe la forma correcta del verbo para practicar tu ortografía.</Text>
+                    </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[styles.button, styles.secondaryButton]}
+                    style={styles.card}
                     onPress={() => navigation.navigate('Quiz', { mode: 'choice' })}
                 >
-                    <Text style={styles.buttonText}>Modo Elegir</Text>
+                    <View style={[styles.iconContainer, { backgroundColor: '#F5F3FF' }]}>
+                        <Text style={styles.cardIcon}>🎯</Text>
+                    </View>
+                    <View style={styles.cardContent}>
+                        <Text style={styles.cardTitle}>Modo Elegir</Text>
+                        <Text style={styles.cardDescription}>Selecciona la opción correcta de una lista de alternativas.</Text>
+                    </View>
                 </TouchableOpacity>
+            </View>
+
+            <View style={styles.infoCard}>
+                <Text style={styles.infoText}>💡 Tip: Practica 10 minutos al día para dominar todos los verbos.</Text>
             </View>
         </View>
     );
@@ -44,57 +57,69 @@ export default function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f5f5f5',
-        padding: 20,
+        backgroundColor: theme.colors.background,
+        padding: theme.spacing.lg,
     },
-    profileButton: {
-        position: 'absolute',
-        top: 50,
-        right: 20,
-        padding: 10,
-        backgroundColor: '#e0e0e0',
-        borderRadius: 8,
-    },
-    profileButtonText: {
-        color: '#333',
-        fontWeight: 'bold',
+    header: {
+        marginTop: theme.spacing.xl,
+        marginBottom: theme.spacing.xl,
     },
     title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        color: '#333',
-        textAlign: 'center',
-        marginTop: 60,
+        ...theme.typography.h1,
+        color: theme.colors.text,
+        marginBottom: theme.spacing.xs,
     },
     subtitle: {
-        fontSize: 18,
-        marginBottom: 40,
-        color: '#666',
-        textAlign: 'center',
+        ...theme.typography.body,
+        color: theme.colors.textSecondary,
     },
-    buttonContainer: {
-        width: '100%',
-        gap: 15,
+    cardContainer: {
+        gap: theme.spacing.md,
+    },
+    card: {
+        flexDirection: 'row',
+        backgroundColor: theme.colors.white,
+        borderRadius: theme.roundness.xl,
+        padding: theme.spacing.md,
         alignItems: 'center',
+        ...theme.shadows.sm,
     },
-    button: {
-        backgroundColor: '#007AFF',
-        paddingHorizontal: 40,
-        paddingVertical: 15,
-        borderRadius: 25,
-        elevation: 3,
-        width: '80%',
+    iconContainer: {
+        width: 60,
+        height: 60,
+        borderRadius: theme.roundness.lg,
+        justifyContent: 'center',
         alignItems: 'center',
+        marginRight: theme.spacing.md,
     },
-    secondaryButton: {
-        backgroundColor: '#5856D6',
+    cardIcon: {
+        fontSize: 30,
     },
-    buttonText: {
-        color: 'white',
-        fontSize: 18,
-        fontWeight: '600',
+    cardContent: {
+        flex: 1,
+    },
+    cardTitle: {
+        ...theme.typography.h3,
+        color: theme.colors.text,
+        marginBottom: 2,
+    },
+    cardDescription: {
+        ...theme.typography.caption,
+        color: theme.colors.textSecondary,
+    },
+    infoCard: {
+        marginTop: 'auto',
+        backgroundColor: theme.colors.white,
+        padding: theme.spacing.md,
+        borderRadius: theme.roundness.lg,
+        borderLeftWidth: 4,
+        borderLeftColor: theme.colors.primary,
+        ...theme.shadows.sm,
+        marginBottom: theme.spacing.xl,
+    },
+    infoText: {
+        ...theme.typography.body,
+        color: theme.colors.textSecondary,
+        fontSize: 14,
     },
 });

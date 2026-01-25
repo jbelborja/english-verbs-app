@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useSession } from '../context/SessionContext';
+import { theme } from '../styles/theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Summary'>;
 
@@ -11,39 +12,37 @@ export default function SummaryScreen({ route, navigation }: Props) {
     const { addResult } = useSession();
 
     useEffect(() => {
-        // Assume 'mode' is passed or we default to 'unknown' if not passed continuously. 
-        // Ideally we should pass 'mode' to Summary as well.
-        // For now, let's assume 'typed' or 'choice' was the mode. 
-        // We can update types.ts to include mode in Summary params, or just default.
-        // Let's defaulted to 'choice' for now as a fallback or fix types.ts properly.
-        // Wait, types.ts Summary param doesn't have mode. I should have added it.
-        // But to avoid breaking too much, I'll just put 'choice' or 'typed' based on guess or update types.
-
-        // Let's update types.ts to include mode in Summary params first? 
-        // Or better, just fix it here.
-        // I will default to 'choice' for now to keep it simple, or update types. 
-        // The user didn't ask for mode tracking specifically but it's in my Context.
-
         addResult({
             score,
             total,
-            mode: 'choice' // Placeholder, ideally passed from QuizScreen
+            mode: 'choice' // Simplified for now
         });
     }, []);
 
+    const percentage = Math.round((score / total) * 100);
+
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>¡Ejercicio Completo!</Text>
+            <View style={styles.content}>
+                <View style={styles.iconCircle}>
+                    <Text style={styles.iconEmoji}>{percentage >= 80 ? '🎉' : percentage >= 50 ? '👏' : '✍️'}</Text>
+                </View>
 
-            <View style={styles.scoreContainer}>
-                <Text style={styles.scoreLabel}>Tu Puntuación</Text>
-                <Text style={styles.scoreValue}>{score} / {total}</Text>
+                <Text style={styles.title}>¡Ejercicio Completo!</Text>
+
+                <View style={styles.scoreCard}>
+                    <Text style={styles.scoreLabel}>Tu Puntuación</Text>
+                    <Text style={[styles.scoreValue, { color: percentage >= 50 ? theme.colors.success : theme.colors.error }]}>
+                        {score} / {total}
+                    </Text>
+                    <Text style={styles.percentageText}>{percentage}% Correcto</Text>
+                </View>
+
+                <Text style={styles.message}>
+                    {score === total ? '¡Increíble! Dominas estos verbos.' :
+                        score > total / 2 ? '¡Buen trabajo! Sigue así.' : '¡Sigue practicando para mejorar!'}
+                </Text>
             </View>
-
-            <Text style={styles.message}>
-                {score === total ? '¡Perfecto!' :
-                    score > total / 2 ? '¡Buen trabajo!' : '¡Sigue practicando!'}
-            </Text>
 
             <TouchableOpacity
                 style={styles.button}
@@ -58,57 +57,73 @@ export default function SummaryScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
-        alignItems: 'center',
+        backgroundColor: theme.colors.background,
+        padding: theme.spacing.xl,
+    },
+    content: {
+        flex: 1,
         justifyContent: 'center',
-        padding: 20,
+        alignItems: 'center',
+    },
+    iconCircle: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: theme.colors.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        ...theme.shadows.md,
+        marginBottom: theme.spacing.lg,
+    },
+    iconEmoji: {
+        fontSize: 50,
     },
     title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 40,
+        ...theme.typography.h1,
+        color: theme.colors.text,
+        marginBottom: theme.spacing.xl,
+        textAlign: 'center',
     },
-    scoreContainer: {
-        backgroundColor: 'white',
-        padding: 40,
-        borderRadius: 20,
+    scoreCard: {
+        backgroundColor: theme.colors.white,
+        padding: theme.spacing.xl,
+        borderRadius: theme.roundness.xl,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 5,
-        marginBottom: 30,
         width: '100%',
+        ...theme.shadows.md,
+        marginBottom: theme.spacing.xl,
     },
     scoreLabel: {
-        fontSize: 18,
-        color: '#666',
-        marginBottom: 10,
+        ...theme.typography.body,
+        color: theme.colors.textSecondary,
+        marginBottom: theme.spacing.sm,
     },
     scoreValue: {
-        fontSize: 48,
-        fontWeight: 'bold',
-        color: '#007AFF',
+        fontSize: 64,
+        fontWeight: '900',
+        marginBottom: theme.spacing.xs,
+    },
+    percentageText: {
+        ...theme.typography.h3,
+        color: theme.colors.textLight,
     },
     message: {
-        fontSize: 20,
-        color: '#444',
-        marginBottom: 40,
+        ...theme.typography.body,
+        color: theme.colors.textSecondary,
+        textAlign: 'center',
         fontStyle: 'italic',
+        paddingHorizontal: 20,
     },
     button: {
-        backgroundColor: '#007AFF',
-        paddingHorizontal: 40,
-        paddingVertical: 15,
-        borderRadius: 25,
-        width: '100%',
+        backgroundColor: theme.colors.primary,
+        paddingVertical: 16,
+        borderRadius: theme.roundness.lg,
         alignItems: 'center',
+        ...theme.shadows.sm,
     },
     buttonText: {
-        color: 'white',
+        color: theme.colors.white,
         fontSize: 18,
-        fontWeight: '600',
+        fontWeight: 'bold',
     },
 });

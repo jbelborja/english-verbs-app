@@ -1,45 +1,59 @@
 import React from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useSession, QuizResult } from '../context/SessionContext';
+import { theme } from '../styles/theme';
 
 export default function ProfileScreen() {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const { history } = useSession();
 
     const renderItem = ({ item }: { item: QuizResult }) => (
         <View style={styles.historyItem}>
-            <Text style={styles.historyDate}>{item.date.toLocaleTimeString()}</Text>
-            <Text style={styles.historyScore}>
-                {item.score} / {item.total} ({Math.round((item.score / item.total) * 100)}%)
-            </Text>
-            <Text style={styles.historyMode}>{item.mode.toUpperCase()}</Text>
+            <View>
+                <Text style={styles.historyDate}>{item.date.toLocaleDateString()} - {item.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                <Text style={styles.historyMode}>{item.mode === 'typed' ? 'Escritura' : 'Selección'}</Text>
+            </View>
+            <View style={styles.scoreBadge}>
+                <Text style={styles.historyScore}>
+                    {item.score}/{item.total}
+                </Text>
+            </View>
         </View>
     );
 
+    const userInitial = user?.email ? user.email[0].toUpperCase() : '?';
+
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.email}>
+            <View style={styles.userHeader}>
+                <View style={[styles.avatar, { backgroundColor: theme.colors.secondary }]}>
+                    <Text style={styles.avatarText}>{userInitial}</Text>
+                </View>
+                <Text style={styles.emailText}>
                     {user?.isAnonymous ? 'Usuario Anónimo' : user?.email}
                 </Text>
-                <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-                    <Text style={styles.logoutText}>Cerrar Sesión</Text>
-                </TouchableOpacity>
+                <Text style={styles.statsLabel}>Has completado {history.length} sesiones</Text>
             </View>
 
-            <Text style={styles.sectionTitle}>Historial de Sesión</Text>
+            <View style={styles.historySection}>
+                <Text style={styles.sectionTitle}>Historial de Sesión</Text>
 
-            {history.length === 0 ? (
-                <Text style={styles.emptyText}>No se han realizado ejercicios en esta sesión.</Text>
-            ) : (
-                <FlatList
-                    data={history}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.listContainer}
-                />
-            )}
+                {history.length === 0 ? (
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyText}>Todavía no has realizado ejercicios.</Text>
+                        <Text style={styles.emptySubtext}>¡Comienza uno ahora desde la pantalla de inicio!</Text>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={history}
+                        renderItem={renderItem}
+                        keyExtractor={(item) => item.id}
+                        contentContainerStyle={styles.listContainer}
+                        showsVerticalScrollIndicator={false}
+                    />
+                )}
+            </View>
         </View>
     );
 }
@@ -47,67 +61,98 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
-        padding: 20,
+        backgroundColor: theme.colors.background,
     },
-    header: {
-        marginBottom: 30,
+    userHeader: {
+        backgroundColor: theme.colors.white,
+        padding: theme.spacing.xl,
         alignItems: 'center',
-        paddingBottom: 20,
         borderBottomWidth: 1,
-        borderBottomColor: '#eee',
+        borderBottomColor: theme.colors.border,
+        ...theme.shadows.sm,
     },
-    email: {
-        fontSize: 18,
+    avatar: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: theme.spacing.md,
+    },
+    avatarText: {
+        fontSize: 32,
         fontWeight: 'bold',
-        marginBottom: 10,
+        color: theme.colors.white,
     },
-    logoutButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 20,
-        backgroundColor: '#ff4444',
-        borderRadius: 20,
+    emailText: {
+        ...theme.typography.h3,
+        color: theme.colors.text,
+        marginBottom: 4,
     },
-    logoutText: {
-        color: '#fff',
-        fontWeight: '600',
+    statsLabel: {
+        ...theme.typography.caption,
+        color: theme.colors.textSecondary,
+    },
+    historySection: {
+        flex: 1,
+        padding: theme.spacing.lg,
     },
     sectionTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 15,
+        ...theme.typography.h3,
+        color: theme.colors.text,
+        marginBottom: theme.spacing.md,
     },
     listContainer: {
-        paddingBottom: 20,
+        paddingBottom: theme.spacing.xl,
     },
     historyItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 15,
-        backgroundColor: '#f8f9fa',
-        borderRadius: 10,
-        marginBottom: 10,
+        padding: theme.spacing.md,
+        backgroundColor: theme.colors.white,
+        borderRadius: theme.roundness.lg,
+        marginBottom: theme.spacing.sm,
+        ...theme.shadows.sm,
     },
     historyDate: {
-        color: '#666',
-        fontSize: 12,
+        ...theme.typography.caption,
+        color: theme.colors.textSecondary,
+        marginBottom: 2,
+    },
+    historyMode: {
+        ...theme.typography.body,
+        fontSize: 14,
+        fontWeight: '600',
+        color: theme.colors.primary,
+    },
+    scoreBadge: {
+        backgroundColor: theme.colors.background,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: theme.roundness.full,
     },
     historyScore: {
         fontWeight: 'bold',
-        fontSize: 16,
+        fontSize: 14,
+        color: theme.colors.text,
     },
-    historyMode: {
-        fontSize: 12,
-        color: '#888',
-        backgroundColor: '#eee',
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 4,
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 40,
     },
     emptyText: {
+        ...theme.typography.body,
+        fontWeight: 'bold',
+        color: theme.colors.textSecondary,
         textAlign: 'center',
-        color: '#888',
-        marginTop: 20,
+    },
+    emptySubtext: {
+        ...theme.typography.caption,
+        color: theme.colors.textLight,
+        textAlign: 'center',
+        marginTop: 4,
     },
 });

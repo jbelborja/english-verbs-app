@@ -4,6 +4,8 @@ import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-naviga
 import { RootStackParamList } from '../navigation/types';
 import { QuizEngine, Question } from '../utils/QuizEngine';
 
+import { theme } from '../styles/theme';
+
 type Props = NativeStackScreenProps<RootStackParamList, 'Quiz'>;
 
 const TOTAL_QUESTIONS = 10;
@@ -20,7 +22,6 @@ export default function QuizScreen({ navigation, route }: Props) {
     const [status, setStatus] = useState<'answering' | 'correct' | 'incorrect'>('answering');
     const [feedback, setFeedback] = useState('');
 
-    // Move loads to a separate function we can call
     const loadNextQuestion = () => {
         if (questionCount >= TOTAL_QUESTIONS) {
             navigation.replace('Summary', { score, total: TOTAL_QUESTIONS });
@@ -40,17 +41,13 @@ export default function QuizScreen({ navigation, route }: Props) {
         setQuestionCount(prev => prev + 1);
     };
 
-    // Initial load
     useEffect(() => {
         loadNextQuestion();
     }, []);
 
     const handleAnswer = (answer: string) => {
-        if (status !== 'answering') return; // Prevent double submission
-
+        if (status !== 'answering') return;
         setUserAnswer(answer);
-
-        // In choice mode, we submit immediately. In typed mode, this is just updating state.
         if (mode === 'choice') {
             submitAnswer(answer);
         }
@@ -58,16 +55,15 @@ export default function QuizScreen({ navigation, route }: Props) {
 
     const submitAnswer = (answerToCheck: string) => {
         if (!currentQuestion) return;
-
         const isCorrect = engine.checkAnswer(currentQuestion, answerToCheck);
 
         if (isCorrect) {
             setScore(prev => prev + 1);
             setStatus('correct');
-            setFeedback('¡Correcto!');
+            setFeedback('¡Muy bien! Correcto.');
         } else {
             setStatus('incorrect');
-            setFeedback(`Incorrecto. La respuesta es: ${engine.getCorrectAnswer(currentQuestion)}`);
+            setFeedback(`Vaya... La respuesta era: ${engine.getCorrectAnswer(currentQuestion)}`);
         }
     };
 
@@ -81,23 +77,29 @@ export default function QuizScreen({ navigation, route }: Props) {
 
     if (!currentQuestion) return null;
 
+    const progress = (questionCount / TOTAL_QUESTIONS);
+
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.container}
         >
-            <View style={styles.header}>
-                <Text style={styles.counterText}>Pregunta {questionCount} / {TOTAL_QUESTIONS}</Text>
-                <Text style={styles.scoreText}>Puntuación: {score}</Text>
+            <View style={styles.topSection}>
+                <View style={styles.progressHeader}>
+                    <Text style={styles.counterText}>Pregunta {questionCount} de {TOTAL_QUESTIONS}</Text>
+                    <Text style={styles.scoreText}>Puntos: {score}</Text>
+                </View>
+                <View style={styles.progressBarBg}>
+                    <View style={[styles.progressBarFill, { width: `${progress * 100}%` }]} />
+                </View>
             </View>
 
             <View style={styles.card}>
-                <Text style={styles.promptLabel}>Dado:</Text>
-                <Text style={styles.promptText}>{currentQuestion.prompt}</Text>
+                <Text style={styles.promptLabel}>Traduce o conjuga:</Text>
+                <Text style={styles.promptText}>{currentQuestion.prompt.split(': ')[1]}</Text>
+                <Text style={styles.hintText}>{currentQuestion.questionText}</Text>
 
                 <View style={styles.divider} />
-
-                <Text style={styles.questionText}>{currentQuestion.questionText}</Text>
 
                 {mode === 'typed' ? (
                     <TextInput
@@ -108,23 +110,27 @@ export default function QuizScreen({ navigation, route }: Props) {
                         ]}
                         value={userAnswer}
                         onChangeText={handleAnswer}
-                        placeholder="Escribe tu respuesta aquí..."
+                        placeholder="Tu respuesta..."
                         autoCapitalize="none"
                         editable={status === 'answering'}
+                        onSubmitEditing={handleTypedSubmit}
                     />
                 ) : (
                     <View style={styles.optionsContainer}>
                         {options.map((opt, index) => {
                             const buttonStyles: any[] = [styles.optionButton];
-                            // If answered, highlight the selected one
+                            let textStyle: any = styles.optionText;
+
                             if (status !== 'answering') {
                                 const isSelected = opt === userAnswer;
                                 const isActuallyCorrect = engine.checkAnswer(currentQuestion, opt);
 
                                 if (isActuallyCorrect) {
                                     buttonStyles.push(styles.optionButtonCorrect);
+                                    textStyle = [textStyle, { color: theme.colors.white }];
                                 } else if (isSelected) {
                                     buttonStyles.push(styles.optionButtonIncorrect);
+                                    textStyle = [textStyle, { color: theme.colors.white }];
                                 }
                             }
 
@@ -135,7 +141,7 @@ export default function QuizScreen({ navigation, route }: Props) {
                                     onPress={() => handleAnswer(opt)}
                                     disabled={status !== 'answering'}
                                 >
-                                    <Text style={styles.optionText}>{opt}</Text>
+                                    <Text style={textStyle}>{opt}</Text>
                                 </TouchableOpacity>
                             );
                         })}
@@ -143,31 +149,33 @@ export default function QuizScreen({ navigation, route }: Props) {
                 )}
 
                 {status !== 'answering' && (
-                    <Text style={[
-                        styles.feedbackText,
-                        status === 'correct' ? styles.feedbackCorrect : styles.feedbackIncorrect
+                    <View style={[
+                        styles.feedbackBox,
+                        status === 'correct' ? styles.feedbackBoxCorrect : styles.feedbackBoxIncorrect
                     ]}>
-                        {feedback}
-                    </Text>
+                        <Text style={styles.feedbackText}>{feedback}</Text>
+                    </View>
                 )}
 
-                {status === 'answering' ? (
-                    mode === 'typed' && (
-                        <TouchableOpacity
-                            style={[styles.button, !userAnswer && styles.buttonDisabled]}
-                            onPress={handleTypedSubmit}
-                            disabled={!userAnswer}
-                        >
-                            <Text style={styles.buttonText}>Comprobar</Text>
+                <View style={styles.actionContainer}>
+                    {status === 'answering' ? (
+                        mode === 'typed' && (
+                            <TouchableOpacity
+                                style={[styles.mainButton, !userAnswer && styles.buttonDisabled]}
+                                onPress={handleTypedSubmit}
+                                disabled={!userAnswer}
+                            >
+                                <Text style={styles.buttonText}>Comprobar</Text>
+                            </TouchableOpacity>
+                        )
+                    ) : (
+                        <TouchableOpacity style={[styles.mainButton, { backgroundColor: theme.colors.secondary }]} onPress={handleNext}>
+                            <Text style={styles.buttonText}>
+                                {questionCount >= TOTAL_QUESTIONS ? 'Ver Resultados' : 'Siguiente'}
+                            </Text>
                         </TouchableOpacity>
-                    )
-                ) : (
-                    <TouchableOpacity style={styles.button} onPress={handleNext}>
-                        <Text style={styles.buttonText}>
-                            {questionCount >= TOTAL_QUESTIONS ? 'Terminar' : 'Siguiente Pregunta'}
-                        </Text>
-                    </TouchableOpacity>
-                )}
+                    )}
+                </View>
             </View>
         </KeyboardAvoidingView>
     );
@@ -176,121 +184,141 @@ export default function QuizScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
-        backgroundColor: '#f5f5f5',
-        justifyContent: 'center',
+        padding: theme.spacing.lg,
+        backgroundColor: theme.colors.background,
     },
-    header: {
+    topSection: {
+        marginBottom: theme.spacing.lg,
+    },
+    progressHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 20,
+        marginBottom: theme.spacing.sm,
     },
     counterText: {
-        fontSize: 16,
-        color: '#666',
+        ...theme.typography.caption,
+        color: theme.colors.textSecondary,
     },
     scoreText: {
-        fontSize: 16,
+        ...theme.typography.caption,
         fontWeight: 'bold',
-        color: '#333',
+        color: theme.colors.primary,
+    },
+    progressBarBg: {
+        height: 8,
+        backgroundColor: theme.colors.border,
+        borderRadius: 4,
+        overflow: 'hidden',
+    },
+    progressBarFill: {
+        height: '100%',
+        backgroundColor: theme.colors.primary,
     },
     card: {
-        backgroundColor: 'white',
-        borderRadius: 15,
-        padding: 25,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        backgroundColor: theme.colors.white,
+        borderRadius: theme.roundness.xl,
+        padding: theme.spacing.xl,
+        ...theme.shadows.md,
     },
     promptLabel: {
-        fontSize: 14,
-        color: '#999',
-        marginBottom: 5,
+        ...theme.typography.caption,
+        color: theme.colors.textLight,
         textTransform: 'uppercase',
+        letterSpacing: 1,
     },
     promptText: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 15,
+        ...theme.typography.h1,
+        color: theme.colors.text,
+        marginVertical: theme.spacing.xs,
+    },
+    hintText: {
+        ...theme.typography.body,
+        color: theme.colors.primary,
+        marginBottom: theme.spacing.md,
+        fontWeight: '600',
     },
     divider: {
         height: 1,
-        backgroundColor: '#eee',
-        marginBottom: 15,
-    },
-    questionText: {
-        fontSize: 18,
-        color: '#444',
-        marginBottom: 15,
+        backgroundColor: theme.colors.border,
+        marginBottom: theme.spacing.lg,
     },
     input: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 10,
-        padding: 15,
+        borderWidth: 2,
+        borderColor: theme.colors.border,
+        borderRadius: theme.roundness.lg,
+        padding: theme.spacing.md,
         fontSize: 18,
-        marginBottom: 15,
-        backgroundColor: '#fafafa',
+        color: theme.colors.text,
+        backgroundColor: theme.colors.background,
+        marginBottom: theme.spacing.lg,
     },
     inputCorrect: {
-        borderColor: '#4CAF50',
-        backgroundColor: '#E8F5E9',
+        borderColor: theme.colors.success,
+        backgroundColor: '#ECFDF5',
     },
     inputIncorrect: {
-        borderColor: '#F44336',
-        backgroundColor: '#FFEBEE',
-    },
-    feedbackText: {
-        fontSize: 16,
-        marginBottom: 15,
-        textAlign: 'center',
-        fontWeight: '600',
-    },
-    feedbackCorrect: {
-        color: '#4CAF50',
-    },
-    feedbackIncorrect: {
-        color: '#F44336',
-    },
-    button: {
-        backgroundColor: '#007AFF',
-        padding: 15,
-        borderRadius: 25,
-        alignItems: 'center',
-    },
-    buttonDisabled: {
-        backgroundColor: '#A0CFFF',
-    },
-    buttonText: {
-        color: 'white',
-        fontSize: 18,
-        fontWeight: '600',
+        borderColor: theme.colors.error,
+        backgroundColor: '#FEF2F2',
     },
     optionsContainer: {
-        marginBottom: 15,
-        gap: 10,
+        gap: theme.spacing.sm,
+        marginBottom: theme.spacing.lg,
     },
     optionButton: {
-        backgroundColor: '#f0f0f0',
-        padding: 15,
-        borderRadius: 10,
+        backgroundColor: theme.colors.white,
+        padding: theme.spacing.md,
+        borderRadius: theme.roundness.lg,
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: theme.colors.border,
         alignItems: 'center',
     },
     optionButtonCorrect: {
-        backgroundColor: '#E8F5E9',
-        borderColor: '#4CAF50',
+        backgroundColor: theme.colors.success,
+        borderColor: theme.colors.success,
     },
     optionButtonIncorrect: {
-        backgroundColor: '#FFEBEE',
-        borderColor: '#F44336',
+        backgroundColor: theme.colors.error,
+        borderColor: theme.colors.error,
     },
     optionText: {
-        fontSize: 16,
-        color: '#333',
+        ...theme.typography.h3,
+        color: theme.colors.text,
+    },
+    feedbackBox: {
+        padding: theme.spacing.md,
+        borderRadius: theme.roundness.lg,
+        marginBottom: theme.spacing.lg,
+        alignItems: 'center',
+    },
+    feedbackBoxCorrect: {
+        backgroundColor: '#ECFDF5',
+    },
+    feedbackBoxIncorrect: {
+        backgroundColor: '#FEF2F2',
+    },
+    feedbackText: {
+        ...theme.typography.body,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        color: theme.colors.text,
+    },
+    actionContainer: {
+        marginTop: theme.spacing.xs,
+    },
+    mainButton: {
+        backgroundColor: theme.colors.primary,
+        padding: theme.spacing.md,
+        borderRadius: theme.roundness.lg,
+        alignItems: 'center',
+        ...theme.shadows.sm,
+    },
+    buttonDisabled: {
+        backgroundColor: theme.colors.textLight,
+        opacity: 0.5,
+    },
+    buttonText: {
+        color: theme.colors.white,
+        fontSize: 18,
+        fontWeight: 'bold',
     },
 });

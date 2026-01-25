@@ -13,51 +13,97 @@ import ProfileScreen from './src/screens/ProfileScreen';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { SessionProvider } from './src/context/SessionContext';
 
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
+import { theme } from './src/styles/theme';
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const Drawer = createDrawerNavigator<RootStackParamList>();
+
+function CustomDrawerContent(props: any) {
+  const { logout } = useAuth();
+  return (
+    <DrawerContentScrollView {...props}>
+      <View style={{ padding: 20, borderBottomWidth: 1, borderBottomColor: theme.colors.border, marginBottom: 10 }}>
+        <ActivityIndicator size="small" color={theme.colors.primary} style={{ alignSelf: 'flex-start', marginBottom: 10 }} />
+      </View>
+      <DrawerItemList {...props} />
+      <DrawerItem
+        label="Cerrar Sesión"
+        onPress={logout}
+        labelStyle={{ color: theme.colors.error, fontWeight: 'bold' }}
+      />
+    </DrawerContentScrollView>
+  );
+}
+
+function AuthenticatedNavigator() {
+  return (
+    <Drawer.Navigator
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.colors.white,
+        },
+        headerTintColor: theme.colors.primary,
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+        drawerActiveTintColor: theme.colors.primary,
+        drawerInactiveTintColor: theme.colors.textSecondary,
+      }}
+    >
+      <Drawer.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{ title: 'Inicio' }}
+      />
+      <Drawer.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ title: 'Mi Perfil' }}
+      />
+      {/* Quiz and Summary stay in Stack but can be accessed from Home */}
+    </Drawer.Navigator>
+  );
+}
 
 function AppNavigator() {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator screenOptions={{
+        headerStyle: { backgroundColor: theme.colors.white },
+        headerTintColor: theme.colors.primary,
+        headerTitleStyle: { fontWeight: 'bold' }
+      }}>
         {user ? (
           <>
             <Stack.Screen
-              name="Home"
-              component={HomeScreen}
+              name="Main"
+              component={AuthenticatedNavigator}
               options={{ headerShown: false }}
             />
             <Stack.Screen
               name="Quiz"
               component={QuizScreen}
-              options={{ title: 'English Verbs Quiz' }}
+              options={{ title: 'Quiz de Verbos' }}
             />
             <Stack.Screen
               name="Summary"
               component={SummaryScreen}
               options={{ headerShown: false }}
             />
-            <Stack.Screen
-              name="Profile"
-              component={ProfileScreen}
-              options={{ title: 'User Profile' }}
-            />
           </>
         ) : (
-          // We can cast LoginScreen as any to satisfy type check if Login isn't in RootStackParamList
-          // Or we can add Login to RootStackParamList. 
-          // Since we are conditionally rendering, the navigation prop in LoginScreen 
-          // won't effectively navigate to Home directly, but allow Auth state change to trigger re-render.
-          // However, LoginScreen doesn't use navigation prop to go to Home, it uses signIn which updates state.
           <Stack.Screen
             name="Login"
             component={LoginScreen}
