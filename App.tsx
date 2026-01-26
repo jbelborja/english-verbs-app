@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from './src/navigation/types';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, Text } from 'react-native';
 
 import HomeScreen from './src/screens/HomeScreen';
 import QuizScreen from './src/screens/QuizScreen';
@@ -20,11 +20,41 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Drawer = createDrawerNavigator<RootStackParamList>();
 
 function CustomDrawerContent(props: any) {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+  const userInitial = user?.email ? user.email[0].toUpperCase() : '?';
+
   return (
     <DrawerContentScrollView {...props}>
-      <View style={{ padding: 20, borderBottomWidth: 1, borderBottomColor: theme.colors.border, marginBottom: 10 }}>
-        <ActivityIndicator size="small" color={theme.colors.primary} style={{ alignSelf: 'flex-start', marginBottom: 10 }} />
+      <View style={{
+        padding: 20,
+        backgroundColor: theme.colors.white,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.border,
+        marginBottom: 10,
+        alignItems: 'center',
+        flexDirection: 'row',
+      }}>
+        <View style={{
+          width: 50,
+          height: 50,
+          borderRadius: 25,
+          backgroundColor: theme.colors.secondary,
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginRight: 15,
+        }}>
+          <Text style={{ color: theme.colors.white, fontWeight: 'bold', fontSize: 20 }}>
+            {userInitial}
+          </Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: theme.colors.text, fontWeight: 'bold', fontSize: 16 }} numberOfLines={1}>
+            {user?.isAnonymous ? 'Usuario Anónimo' : user?.email}
+          </Text>
+          <Text style={{ color: theme.colors.textSecondary, fontSize: 12 }}>
+            Verbos en Inglés
+          </Text>
+        </View>
       </View>
       <DrawerItemList {...props} />
       <DrawerItem
