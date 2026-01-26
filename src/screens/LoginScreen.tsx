@@ -21,11 +21,13 @@ export default function LoginScreen() {
     const [request, response, promptAsync] = Google.useAuthRequest({
         androidClientId: '364645965860-j2m30laq1notojgupjhqmuchq60q5n3p.apps.googleusercontent.com',
         webClientId: '364645965860-sjietr9u3dcdvt8ieecekga0jp7ul37g.apps.googleusercontent.com',
-        redirectUri
     });
 
     useEffect(() => {
         const handleResponse = async () => {
+            if (response) {
+                console.log('Google Auth Response:', response);
+            }
             if (response?.type === 'success') {
                 try {
                     const { id_token, access_token } = response.params;
@@ -37,6 +39,7 @@ export default function LoginScreen() {
                 }
             } else if (response?.type === 'error') {
                 console.error('Google Auth Error:', response.error);
+                console.error('Response Details:', response);
                 alert(`Error de autenticación con Google: ${response.error?.message || 'Error desconocido'}`);
             }
         };

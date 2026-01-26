@@ -3,7 +3,7 @@ import { getAuth } from 'firebase/auth';
 
 // Firebase configuration for english-verbs-app
 const firebaseConfig = {
-    apiKey: "AIzaSyAEJ9Xe4DjXa2wiwlrz-S9RB5LXMzKSFFI",
+    apiKey: "AIzaSyCaocBqME-_8qRys1L8S2tUuhdUKLM9iGY",
     authDomain: "english-verbs-app.firebaseapp.com",
     projectId: "english-verbs-app",
     storageBucket: "english-verbs-app.firebasestorage.app",
