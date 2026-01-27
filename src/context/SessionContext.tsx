@@ -5,7 +5,7 @@ export interface QuizResult {
     date: Date;
     score: number;
     total: number;
-    mode: 'typed' | 'choice';
+    mode: 'typed' | 'choice' | 'drag';
 }
 
 interface SessionContextType {

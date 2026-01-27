@@ -125,7 +125,7 @@ function AppNavigator() {
             <Stack.Screen
               name="Quiz"
               component={QuizScreen}
-              options={{ title: 'Quiz de Verbos' }}
+              options={{ title: 'Práctica de Verbos' }}
             />
             <Stack.Screen
               name="Summary"

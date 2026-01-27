@@ -8,14 +8,14 @@ import { theme } from '../styles/theme';
 type Props = NativeStackScreenProps<RootStackParamList, 'Summary'>;
 
 export default function SummaryScreen({ route, navigation }: Props) {
-    const { score, total } = route.params;
+    const { score, total, mode } = route.params;
     const { addResult } = useSession();
 
     useEffect(() => {
         addResult({
             score,
             total,
-            mode: 'choice' // Simplified for now
+            mode
         });
     }, []);
 
@@ -33,7 +33,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
                 <View style={styles.scoreCard}>
                     <Text style={styles.scoreLabel}>Tu Puntuación</Text>
                     <Text style={[styles.scoreValue, { color: percentage >= 50 ? theme.colors.success : theme.colors.error }]}>
-                        {score} / {total}
+                        {Number.isInteger(score) ? score : score.toFixed(1)} / {total}
                     </Text>
                     <Text style={styles.percentageText}>{percentage}% Correcto</Text>
                 </View>

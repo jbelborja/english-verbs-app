@@ -45,6 +45,19 @@ export default function HomeScreen({ navigation }: Props) {
                         <Text style={styles.cardDescription}>Selecciona la opción correcta de una lista de alternativas.</Text>
                     </View>
                 </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.card}
+                    onPress={() => navigation.navigate('Quiz', { mode: 'drag' })}
+                >
+                    <View style={[styles.iconContainer, { backgroundColor: '#ECFDF5' }]}>
+                        <Text style={styles.cardIcon}>🖱️</Text>
+                    </View>
+                    <View style={styles.cardContent}>
+                        <Text style={styles.cardTitle}>Modo Arrastrar</Text>
+                        <Text style={styles.cardDescription}>Ordena las formas correctas en sus respectivos lugares.</Text>
+                    </View>
+                </TouchableOpacity>
             </View>
 
             <View style={styles.infoCard}>

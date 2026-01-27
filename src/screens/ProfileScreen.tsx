@@ -12,7 +12,9 @@ export default function ProfileScreen() {
         <View style={styles.historyItem}>
             <View>
                 <Text style={styles.historyDate}>{item.date.toLocaleDateString()} - {item.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                <Text style={styles.historyMode}>{item.mode === 'typed' ? 'Escritura' : 'Selección'}</Text>
+                <Text style={styles.historyMode}>
+                    {item.mode === 'typed' ? 'Escritura' : item.mode === 'choice' ? 'Selección' : 'Arrastrar'}
+                </Text>
             </View>
             <View style={styles.scoreBadge}>
                 <Text style={styles.historyScore}>
