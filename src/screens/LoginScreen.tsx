@@ -15,7 +15,6 @@ export default function LoginScreen() {
 
     const redirectUri = makeRedirectUri({
         scheme: 'englishverbsapp',
-        preferLocalhost: true,
     });
 
     const [request, response, promptAsync] = Google.useAuthRequest({
