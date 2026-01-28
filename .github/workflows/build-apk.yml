@@ -63,26 +63,21 @@ jobs:
       - name: Build APK
         working-directory: android
         run: ./gradlew assembleRelease
-        env:
-          # Convert file path to be accessible by Gradle
-          # We pass the store path, password, alias, and key password as env vars
-          # You might need to adjust android/app/build.gradle to read these or use a signing config
-          # For a standard React Native / Expo prebuild, it's often easier to specificy these in gradle.properties or command line
-          # Here we just run assembleRelease. Without signing config updates in build.gradle, this might produce unsigned or debug signed unless configured.
-          # To keep it simple for now, we will inject the signing config dynamically or expect the user to have configured app.json correctly if possible,
-          # BUT standard expo prebuild doesn't auto-configure signing for gradle unless using EAS.
-          # So we will let it build the unsigned/debug release or standard release.
-          # Wait, standard `./gradlew assembleRelease` will fail or produce unsigned if no signing config is present.
-          # Let's try to inject the signing properties via command line params which is safer.
-          ORG_GRADLE_PROJECT_androidStoreFile: ${{ steps.decode_keystore.outputs.filePath }}
-          ORG_GRADLE_PROJECT_androidStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ORG_GRADLE_PROJECT_androidKeyAlias: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ORG_GRADLE_PROJECT_androidKeyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-      - name: Upload APK
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      - name: Upload Signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: android/app/build/outputs/apk/release/app-release.apk
+          name: app-release-signed
+          path: ${{ steps.sign_app.outputs.signedReleaseFile }}
 
         

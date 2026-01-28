@@ -13,6 +13,7 @@ import { theme } from '../styles/theme';
 export default function LoginScreen() {
     const { signInAnonymously, signInWithGoogleCredential, loading } = useAuth();
 
+    // Use a simpler redirect URI or let Expo handle it
     const redirectUri = makeRedirectUri({
         scheme: 'englishverbsapp',
     });
@@ -22,6 +23,7 @@ export default function LoginScreen() {
         webClientId: '364645965860-sjietr9u3dcdvt8ieecekga0jp7ul37g.apps.googleusercontent.com',
         redirectUri,
         responseType: 'id_token',
+        usePKCE: true,
     });
 
     useEffect(() => {
