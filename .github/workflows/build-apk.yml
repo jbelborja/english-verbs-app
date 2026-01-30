@@ -65,12 +65,22 @@ jobs:
         run: |
           # Find the APK
           APK_PATH=$(find android/app/build/outputs/apk/release -name "*.apk" | head -1)
+          if [ -z "$APK_PATH" ]; then
+            echo "::error::No APK found to sign!"
+            exit 1
+          fi
           echo "Signing APK: $APK_PATH"
           
-          # Sign the APK using apksigner
-          # apksigner is usually located in the build-tools directory of the Android SDK
-          # On GitHub runner, it's typically in the PATH
-          apksigner sign --ks my-release-key.jks \
+          # Find apksigner in the Android SDK build-tools
+          APKSIGNER_PATH=$(find $ANDROID_SDK_ROOT/build-tools -name apksigner | sort -r | head -1)
+          if [ -z "$APKSIGNER_PATH" ]; then
+            echo "::error::apksigner not found in $ANDROID_SDK_ROOT/build-tools"
+            exit 1
+          fi
+          echo "Using apksigner at: $APKSIGNER_PATH"
+
+          # Sign the APK
+          $APKSIGNER_PATH sign --ks my-release-key.jks \
             --ks-pass pass:"$KEYSTORE_PASSWORD" \
             --key-pass pass:"$KEY_PASSWORD" \
             --ks-key-alias "$KEY_ALIAS" \
