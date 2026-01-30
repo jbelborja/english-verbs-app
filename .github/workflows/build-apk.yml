@@ -57,6 +57,13 @@ jobs:
         working-directory: android
         run: ./gradlew assembleRelease
 
+      - name: Decode Keystore
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1.2
+        with:
+          fileName: 'my-release-key.jks'
+          encodedString: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+
       - name: Sign APK
         env:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -80,7 +87,7 @@ jobs:
           echo "Using apksigner at: $APKSIGNER_PATH"
 
           # Sign the APK
-          $APKSIGNER_PATH sign --ks my-release-key.jks \
+          $APKSIGNER_PATH sign --ks ${{ steps.decode_keystore.outputs.filePath }} \
             --ks-pass pass:"$KEYSTORE_PASSWORD" \
             --key-pass pass:"$KEY_PASSWORD" \
             --ks-key-alias "$KEY_ALIAS" \
