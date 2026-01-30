@@ -40,7 +40,7 @@ jobs:
             enabled: ${{ github.event.inputs.build_linux == 'true' }}
 
     runs-on: ${{ matrix.platform }}
-    if: matrix.enabled
+    if: ${{ matrix.enabled }}
 
     steps:
       - name: Checkout code
