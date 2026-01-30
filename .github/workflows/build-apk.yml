@@ -53,31 +53,34 @@ jobs:
       - name: Prebuild Android
         run: npx expo prebuild --platform android --no-install
 
-      - name: Decode Keystore
-        id: decode_keystore
-        uses: timheuer/base64-to-file@v1.2
-        with:
-          fileName: 'my-release-key.jks'
-          encodedString: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-
       - name: Build APK
         working-directory: android
         run: ./gradlew assembleRelease
 
       - name: Sign APK
-        uses: r0adkll/sign-android-release@v1
-        id: sign_app
-        with:
-          releaseDirectory: android/app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          # Find the APK
+          APK_PATH=$(find android/app/build/outputs/apk/release -name "*.apk" | head -1)
+          echo "Signing APK: $APK_PATH"
+          
+          # Sign the APK using apksigner
+          # apksigner is usually located in the build-tools directory of the Android SDK
+          # On GitHub runner, it's typically in the PATH
+          apksigner sign --ks my-release-key.jks \
+            --ks-pass pass:"$KEYSTORE_PASSWORD" \
+            --key-pass pass:"$KEY_PASSWORD" \
+            --ks-key-alias "$KEY_ALIAS" \
+            --out app-release-signed.apk \
+            "$APK_PATH"
 
       - name: Upload Signed APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release-signed
-          path: ${{ steps.sign_app.outputs.signedReleaseFile }}
+          path: app-release-signed.apk
 
         
