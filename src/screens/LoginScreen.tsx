@@ -21,9 +21,8 @@ export default function LoginScreen() {
     const [request, response, promptAsync] = Google.useAuthRequest({
         androidClientId: '364645965860-j2m30laq1notojgupjhqmuchq60q5n3p.apps.googleusercontent.com',
         webClientId: '364645965860-sjietr9u3dcdvt8ieecekga0jp7ul37g.apps.googleusercontent.com',
-        redirectUri,
         responseType: 'id_token',
-        usePKCE: true,
+        usePKCE: false,
     });
 
     useEffect(() => {
