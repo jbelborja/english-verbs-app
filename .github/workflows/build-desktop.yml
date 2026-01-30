@@ -67,16 +67,35 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libsoup-3.0-dev libjavascriptcoregtk-4.1-dev
 
+      - name: Build Web App
+        if: ${{ matrix.enabled }}
+        run: |
+          npm run build:web
+          echo "Listing web build output (dist):"
+          ls -la dist || echo "dist directory not found"
+
       - name: Build Desktop App
         if: ${{ matrix.enabled }}
-        id: tauri_build
-        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ""
-        with:
-          args: --verbose
-          includeRelease: false
+        run: |
+          # Use npx to run tauri build directly
+          # We skip the beforeBuildCommand in tauri.conf.json by running it manually above
+          npx --yes @tauri-apps/cli build --verbose
+
+      - name: Debug - Locate Binaries
+        if: ${{ matrix.enabled }}
+        run: |
+          echo "--- Binary Location Debug ---"
+          echo "Current directory: $(pwd)"
+          
+          echo "Listing src-tauri/target:"
+          ls -la src-tauri/target || echo "target not found"
+          
+          echo "Searching for all binaries (AppImage, deb, dmg, exe, msi):"
+          find src-tauri/target -name "*.AppImage" -o -name "*.deb" -o -name "*.dmg" -o -name "*.exe" -o -name "*.msi" -o -name "*.app"
+          echo "--- End Debug ---"
 
       - name: Upload Artifacts
         if: ${{ matrix.enabled }}
@@ -84,13 +103,18 @@ jobs:
         with:
           name: english-verbs-${{ matrix.id }}
           path: |
-            src-tauri/target/**/bundle/**/*.deb
-            src-tauri/target/**/bundle/**/*.AppImage
-            src-tauri/target/**/bundle/**/*.appimage
-            src-tauri/target/**/bundle/**/*.dmg
-            src-tauri/target/**/bundle/**/*.exe
-            src-tauri/target/**/bundle/**/*.msi
-            src-tauri/target/**/bundle/**/*.pkg
-            src-tauri/target/**/bundle/**/*.rpm
-            src-tauri/target/**/bundle/**/*.zip
-            src-tauri/target/**/bundle/**/*.tar.gz
+            src-tauri/target/release/bundle/**/*.deb
+            src-tauri/target/release/bundle/**/*.AppImage
+            src-tauri/target/release/bundle/**/*.appimage
+            src-tauri/target/release/bundle/**/*.dmg
+            src-tauri/target/release/bundle/**/*.exe
+            src-tauri/target/release/bundle/**/*.msi
+            src-tauri/target/release/bundle/**/*.app
+            src-tauri/target/release/bundle/**/*.pkg
+            src-tauri/target/release/bundle/**/*.tar.gz
+            src-tauri/target/release/*.deb
+            src-tauri/target/release/*.AppImage
+            src-tauri/target/release/*.dmg
+            src-tauri/target/release/*.exe
+            src-tauri/target/release/*.msi
+            src-tauri/target/release/*.app
