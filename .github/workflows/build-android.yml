@@ -2,14 +2,6 @@ name: Build Android APK (Tauri v2)
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'src-tauri/**'
-      - 'src/**'
-      - 'package.json'
-      - 'vite.config.ts'
 
 jobs:
   build-android:
@@ -73,14 +65,19 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
-          APK_PATH=$(find src-tauri/gen/android/app/build/outputs/apk/release -name "*.apk" | head -1)
+          APK_PATH=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" | head -1)
           if [ -z "$APK_PATH" ]; then
             echo "::error::No APK found to sign!"
             exit 1
           fi
+          echo "Found APK at: $APK_PATH"
           
           # Use apksigner from the Android SDK
           APKSIGNER_PATH=$(find $ANDROID_HOME/build-tools -name apksigner | sort -r | head -1)
+          
+          # Ensure the output directory exists
+          mkdir -p src-tauri/gen/android/app/build/outputs/apk/release
+          
           "$APKSIGNER_PATH" sign --ks ${{ steps.decode_keystore.outputs.filePath }} \
             --ks-pass pass:$KEYSTORE_PASSWORD \
             --ks-key-alias $KEY_ALIAS \
