@@ -5,9 +5,9 @@
   "identifier": "com.jbelborja.englishverbsapp",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:8081",
+    "devUrl": "http://localhost:5173",
     "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build:web"
+    "beforeBuildCommand": "npm run build"
   },
   "app": {
     "windows": [

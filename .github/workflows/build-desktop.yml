@@ -55,7 +55,7 @@ jobs:
 
       - name: Install dependencies
         if: ${{ matrix.enabled }}
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Install Rust
         if: ${{ matrix.enabled }}
@@ -70,7 +70,7 @@ jobs:
       - name: Build Web App
         if: ${{ matrix.enabled }}
         run: |
-          npm run build:web
+          npm run build
           echo "Listing web build output (dist):"
           ls -la dist || echo "dist directory not found"
 

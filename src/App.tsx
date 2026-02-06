@@ -1,20 +1,20 @@
-import { StatusBar } from 'expo-status-bar';
+// import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { RootStackParamList } from './src/navigation/types';
+import { RootStackParamList } from './navigation/types';
 import { ActivityIndicator, View, Text } from 'react-native';
 
-import HomeScreen from './src/screens/HomeScreen';
-import QuizScreen from './src/screens/QuizScreen';
-import SummaryScreen from './src/screens/SummaryScreen';
-import LoginScreen from './src/screens/LoginScreen';
-import ProfileScreen from './src/screens/ProfileScreen';
+import HomeScreen from './screens/HomeScreen';
+import QuizScreen from './screens/QuizScreen';
+import SummaryScreen from './screens/SummaryScreen';
+import LoginScreen from './screens/LoginScreen';
+import ProfileScreen from './screens/ProfileScreen';
 
-import { AuthProvider, useAuth } from './src/context/AuthContext';
-import { SessionProvider } from './src/context/SessionContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { SessionProvider } from './context/SessionContext';
 
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
-import { theme } from './src/styles/theme';
+import { theme } from './styles/theme';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Drawer = createDrawerNavigator<RootStackParamList>();
@@ -141,7 +141,7 @@ function AppNavigator() {
           />
         )}
       </Stack.Navigator>
-      <StatusBar style="auto" />
+      {/* <StatusBar style="auto" /> */}
     </NavigationContainer>
   );
 }

@@ -46,7 +46,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
 
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate('Home')}
+                onPress={() => navigation.navigate('Main')}
             >
                 <Text style={styles.buttonText}>Volver al Inicio</Text>
             </TouchableOpacity>
