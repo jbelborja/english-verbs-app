@@ -40,6 +40,11 @@ jobs:
       - name: install dependencies
         run: npm install --legacy-peer-deps
 
+      - name: create google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo "$GOOGLE_SERVICES_JSON" > google-services.json
+
       - name: build frontend
         run: npm run build
 
@@ -55,8 +60,36 @@ jobs:
         env:
           NDK_HOME: ${{ steps.setup-android.outputs.ndk-path }}
 
+      - name: decode keystore
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1.2
+        with:
+          fileName: 'release-key.jks'
+          encodedString: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+
+      - name: sign apk
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          APK_PATH=$(find src-tauri/gen/android/app/build/outputs/apk/release -name "*.apk" | head -1)
+          if [ -z "$APK_PATH" ]; then
+            echo "::error::No APK found to sign!"
+            exit 1
+          fi
+          
+          # Use apksigner from the Android SDK
+          APKSIGNER_PATH=$(find $ANDROID_HOME/build-tools -name apksigner | sort -r | head -1)
+          "$APKSIGNER_PATH" sign --ks ${{ steps.decode_keystore.outputs.filePath }} \
+            --ks-pass pass:$KEYSTORE_PASSWORD \
+            --ks-key-alias $KEY_ALIAS \
+            --key-pass pass:$KEY_PASSWORD \
+            --out src-tauri/gen/android/app/build/outputs/apk/release/app-signed.apk \
+            "$APK_PATH"
+
       - name: upload apk
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: src-tauri/gen/android/app/build/outputs/apk/release/*.apk
+          path: src-tauri/gen/android/app/build/outputs/apk/release/app-signed.apk
