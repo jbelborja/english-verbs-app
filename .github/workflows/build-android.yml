@@ -1,0 +1,62 @@
+name: Build Android APK (Tauri v2)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src-tauri/**'
+      - 'src/**'
+      - 'package.json'
+      - 'vite.config.ts'
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: setup java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: setup android sdk
+        uses: android-actions/setup-android@v3
+
+      - name: install rust
+        uses: dtolnay/rustup@stable
+        with:
+          targets: aarch64-linux-android, armv7-linux-androideabi, i686-linux-android, x86_64-linux-android
+
+      - name: install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: build frontend
+        run: npm run build
+
+      - name: initialize tauri android
+        # Only run init if the directory doesn't exist
+        run: |
+          if [ ! -d "src-tauri/gen/android" ]; then
+            npx tauri android init --ci
+          fi
+
+      - name: build android release
+        run: npx tauri android build --apk
+        env:
+          NDK_HOME: ${{ steps.setup-android.outputs.ndk-path }}
+
+      - name: upload apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: src-tauri/gen/android/app/build/outputs/apk/release/*.apk
