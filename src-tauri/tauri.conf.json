@@ -33,16 +33,7 @@
   },
   "plugins": {
     "shell": {
-      "open": true,
-      "scope": [
-        {
-          "name": "google-oauth",
-          "cmd": "",
-          "sidecar": false,
-          "args": false,
-          "url": "https://accounts.google.com/*"
-        }
-      ]
+      "open": true
     },
     "deep-link": {
       "mobile": [

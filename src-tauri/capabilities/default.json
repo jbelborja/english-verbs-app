@@ -9,7 +9,20 @@
     "core:default",
     "oauth:allow-start",
     "oauth:allow-cancel",
-    "shell:allow-open",
+    {
+      "identifier": "shell:allow-open",
+      "scope": {
+        "allow": [
+          {
+            "schemes": [
+              "http",
+              "https"
+            ],
+            "host": "accounts.google.com"
+          }
+        ]
+      }
+    },
     "deep-link:default"
   ]
 }
