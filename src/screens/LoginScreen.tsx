@@ -49,25 +49,29 @@ export default function LoginScreen() {
         }
 
         // Desktop Desktop / Generic Tauri Desktop fallback (OAuth plugin)
-        const { start } = await import('@fabianlars/tauri-plugin-oauth');
-        const port = await start({
-          handler: async (url: string) => {
-            console.log('Received OAuth redirect:', url);
-            try {
-              const hash = url.split('#')[1];
-              const params = new URLSearchParams(hash);
-              const accessToken = params.get('access_token');
-              const idToken = params.get('id_token');
+        const { start, onUrl } = await import('@fabianlars/tauri-plugin-oauth');
 
-              if (accessToken || idToken) {
-                const credential = GoogleAuthProvider.credential(idToken, accessToken);
-                await signInWithGoogleCredential(credential);
-              }
-            } catch (e) {
-              console.error('Failed to handle OAuth redirect', e);
+        // Register listener before starting the server
+        const unlisten = await onUrl(async (url: string) => {
+          console.log('Received OAuth redirect:', url);
+          try {
+            const hash = url.split('#')[1];
+            const params = new URLSearchParams(hash);
+            const accessToken = params.get('access_token');
+            const idToken = params.get('id_token');
+
+            if (accessToken || idToken) {
+              const credential = GoogleAuthProvider.credential(idToken, accessToken);
+              await signInWithGoogleCredential(credential);
             }
+            // Optional: unlisten() if you only want one-time behavior
+            // unlisten();
+          } catch (e) {
+            console.error('Failed to handle OAuth redirect', e);
           }
         });
+
+        const port = await start();
 
         const redirectUri = `http://localhost:${port}`;
         const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=email%20profile%20openid`;
