@@ -44,14 +44,12 @@
           "host": "auth"
         }
       ],
-      "desktop": [
-        {
-          "schemes": [
-            "com.jbelborja.englishverbsapp"
-          ],
-          "host": "auth"
-        }
-      ]
+      "desktop": {
+        "schemes": [
+          "com.jbelborja.englishverbsapp"
+        ],
+        "host": "auth"
+      }
     }
   }
 }
