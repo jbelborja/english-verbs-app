@@ -19,9 +19,10 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '21'
 
       - name: setup android sdk
+        id: setup-android
         uses: android-actions/setup-android@v3
 
       - name: install rust
@@ -45,6 +46,19 @@ jobs:
         run: |
           if [ ! -d "src-tauri/gen/android" ]; then
             npx tauri android init --ci
+          fi
+
+      - name: patch android manifest for oauth
+        run: |
+          MANIFEST_PATH="src-tauri/gen/android/app/src/main/AndroidManifest.xml"
+          
+          # Check if queries block already exists
+          if ! grep -q "<queries>" "$MANIFEST_PATH"; then
+            # Insert queries block before closing </manifest> tag
+            sed -i 's|</manifest>|    <queries>\n        <intent>\n            <action android:name="android.intent.action.VIEW" />\n            <data android:scheme="https" />\n        </intent>\n    </queries>\n</manifest>|' "$MANIFEST_PATH"
+            echo "✓ Added <queries> block to AndroidManifest.xml"
+          else
+            echo "✓ <queries> block already exists"
           fi
 
       - name: build android release
