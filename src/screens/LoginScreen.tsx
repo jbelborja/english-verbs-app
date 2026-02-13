@@ -71,7 +71,9 @@ export default function LoginScreen() {
           }
         });
 
-        const port = await start();
+        const port = await start({
+          ports: [14200]
+        });
 
         const redirectUri = `http://localhost:${port}`;
         const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=email%20profile%20openid`;
