@@ -61,6 +61,15 @@ jobs:
             echo "✓ <queries> block already exists"
           fi
 
+          # Add intent-filter for deep links to MainActivity
+          if ! grep -q "com.jbelborja.englishverbsapp" "$MANIFEST_PATH"; then
+            INTENT_FILTER='<intent-filter>\n                <action android:name="android.intent.action.VIEW" />\n                <category android:name="android.intent.category.DEFAULT" />\n                <category android:name="android.intent.category.BROWSABLE" />\n                <data android:scheme="com.jbelborja.englishverbsapp" android:host="auth" />\n            </intent-filter>'
+            sed -i "/<activity/a \            $INTENT_FILTER" "$MANIFEST_PATH"
+            echo "✓ Added intent-filter for deep links to AndroidManifest.xml"
+          else
+            echo "✓ Intent-filter for deep links already exists"
+          fi
+
       - name: build android release
         run: npx tauri android build --apk
         env:

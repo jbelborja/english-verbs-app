@@ -15,29 +15,60 @@ export default function LoginScreen() {
       const isTauri = typeof window !== 'undefined' && (window as any).__TAURI_INTERNALS__;
 
       if (isTauri) {
-        const { start } = await import('@fabianlars/tauri-plugin-oauth');
         const { open } = await import('@tauri-apps/plugin-shell');
+        const clientId = "364645965860-sjietr9u3dcdvt8ieecekga0jp7ul37g.apps.googleusercontent.com";
+        const isMobile = window.navigator.userAgent.includes('Android');
 
-        // Start local server to receive the code/token
-        const port = await start(async (url: string) => {
-          console.log('Received OAuth redirect:', url);
-          try {
-            // Extract the access_token from the fragment (#)
-            const hash = url.split('#')[1];
-            const params = new URLSearchParams(hash);
-            const accessToken = params.get('access_token');
-            const idToken = params.get('id_token');
+        if (isMobile) {
+          const { onOpenUrl } = await import('@tauri-apps/plugin-deep-link');
+          const redirectUri = "com.jbelborja.englishverbsapp://auth";
+          const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=email%20profile%20openid`;
 
-            if (accessToken || idToken) {
-              const credential = GoogleAuthProvider.credential(idToken, accessToken);
-              await signInWithGoogleCredential(credential);
+          await onOpenUrl(async (urls) => {
+            console.log('Received deep link urls:', urls);
+            const url = urls[0];
+            if (url && url.includes('access_token')) {
+              try {
+                const hash = url.split('#')[1];
+                const params = new URLSearchParams(hash);
+                const accessToken = params.get('access_token');
+                const idToken = params.get('id_token');
+
+                if (accessToken || idToken) {
+                  const credential = GoogleAuthProvider.credential(idToken, accessToken);
+                  await signInWithGoogleCredential(credential);
+                }
+              } catch (e) {
+                console.error('Failed to handle deep link redirect', e);
+              }
             }
-          } catch (e) {
-            console.error('Failed to handle OAuth redirect', e);
+          });
+
+          await open(authUrl);
+          return;
+        }
+
+        // Desktop Desktop / Generic Tauri Desktop fallback (OAuth plugin)
+        const { start } = await import('@fabianlars/tauri-plugin-oauth');
+        const port = await start({
+          handler: async (url: string) => {
+            console.log('Received OAuth redirect:', url);
+            try {
+              const hash = url.split('#')[1];
+              const params = new URLSearchParams(hash);
+              const accessToken = params.get('access_token');
+              const idToken = params.get('id_token');
+
+              if (accessToken || idToken) {
+                const credential = GoogleAuthProvider.credential(idToken, accessToken);
+                await signInWithGoogleCredential(credential);
+              }
+            } catch (e) {
+              console.error('Failed to handle OAuth redirect', e);
+            }
           }
         });
 
-        const clientId = "364645965860-sjietr9u3dcdvt8ieecekga0jp7ul37g.apps.googleusercontent.com";
         const redirectUri = `http://localhost:${port}`;
         const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=email%20profile%20openid`;
 

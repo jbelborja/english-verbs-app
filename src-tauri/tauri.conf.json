@@ -33,7 +33,26 @@
   },
   "plugins": {
     "shell": {
-      "open": true
+      "open": true,
+      "scope": [
+        {
+          "name": "google-oauth",
+          "cmd": "",
+          "sidecar": false,
+          "args": false,
+          "url": "https://accounts.google.com/*"
+        }
+      ]
+    },
+    "deep-link": {
+      "mobile": [
+        {
+          "schemes": [
+            "com.jbelborja.englishverbsapp"
+          ],
+          "host": "auth"
+        }
+      ]
     }
   }
 }
