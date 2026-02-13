@@ -42,9 +42,9 @@ jobs:
         run: npm run build
 
       - name: initialize tauri android
-        # Only run init if the directory doesn't exist
+        # Only run init if the manifest doesn't exist
         run: |
-          if [ ! -d "src-tauri/gen/android" ]; then
+          if [ ! -f "src-tauri/gen/android/app/src/main/AndroidManifest.xml" ]; then
             npx tauri android init --ci
           fi
 
