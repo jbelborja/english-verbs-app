@@ -40,8 +40,7 @@
         {
           "schemes": [
             "com.jbelborja.englishverbsapp"
-          ],
-          "host": "auth"
+          ]
         }
       ],
       "desktop": {
