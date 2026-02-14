@@ -48,39 +48,19 @@ jobs:
             npx tauri android init --ci
           fi
 
-      - name: patch android manifest for oauth
-        run: |
-          MANIFEST_PATH="src-tauri/gen/android/app/src/main/AndroidManifest.xml"
-          
-          # Check if queries block already exists
-          if ! grep -q "<queries>" "$MANIFEST_PATH"; then
-            # Insert queries block before closing </manifest> tag
-            sed -i 's|</manifest>|    <queries>\n        <intent>\n            <action android:name="android.intent.action.VIEW" />\n            <data android:scheme="https" />\n        </intent>\n    </queries>\n</manifest>|' "$MANIFEST_PATH"
-            echo "✓ Added <queries> block to AndroidManifest.xml"
-          else
-            echo "✓ <queries> block already exists"
-          fi
-
-          # Add intent-filter for deep links to MainActivity
-          if ! grep -q "com.jbelborja.englishverbsapp" "$MANIFEST_PATH"; then
-            INTENT_FILTER='<intent-filter>\n                <action android:name="android.intent.action.VIEW" />\n                <category android:name="android.intent.category.DEFAULT" />\n                <category android:name="android.intent.category.BROWSABLE" />\n                <data android:scheme="com.jbelborja.englishverbsapp" android:host="auth" />\n            </intent-filter>'
-            sed -i "/<activity/a \            $INTENT_FILTER" "$MANIFEST_PATH"
-            echo "✓ Added intent-filter for deep links to AndroidManifest.xml"
-          else
-            echo "✓ Intent-filter for deep links already exists"
-          fi
-
-      - name: build android release
-        run: npx tauri android build --apk
-        env:
-          NDK_HOME: ${{ steps.setup-android.outputs.ndk-path }}
-
       - name: decode keystore
         id: decode_keystore
         uses: timheuer/base64-to-file@v1.2
         with:
           fileName: 'release-key.jks'
           encodedString: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+
+      - name: Print Keystore SHA-1
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          keytool -list -v -keystore ${{ steps.decode_keystore.outputs.filePath }} -alias $KEY_ALIAS -storepass $KEYSTORE_PASSWORD
 
       - name: sign apk
         env:
