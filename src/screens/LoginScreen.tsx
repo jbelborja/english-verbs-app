@@ -84,14 +84,11 @@ export default function LoginScreen() {
           return;
         }
 
-        const redirectUri = `http://localhost:${port}`;
+        const redirectUri = `http://127.0.0.1:${port}`;
         console.log('--- OAuth Debug ---');
         console.log('Redirect URI:', redirectUri);
         console.log('Client ID:', clientId);
         console.log('-------------------');
-
-        // ALERT FOR DEBUGGING: Show the URI to the user so they can verify it!
-        alert(`OAuth Redirect URI: ${redirectUri}\n\nPlease ensure this EXACT URL is added to your Google Cloud Console "Authorized redirect URIs".`);
 
         const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=email%20profile%20openid`;
 
