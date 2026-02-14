@@ -17,7 +17,8 @@ export default function LoginScreen() {
       if (isTauri) {
         const { open } = await import('@tauri-apps/plugin-shell');
         const clientId = "364645965860-sjietr9u3dcdvt8ieecekga0jp7ul37g.apps.googleusercontent.com";
-        const isMobile = window.navigator.userAgent.includes('Android');
+        const isMobile = window.navigator.userAgent.includes('Android') || window.navigator.userAgent.includes('iPhone') || window.navigator.userAgent.includes('iPad');
+        console.log("Login Environment - isTauri:", isTauri, "isMobile:", isMobile, "UserAgent:", window.navigator.userAgent);
 
         if (isMobile) {
           const { onOpenUrl } = await import('@tauri-apps/plugin-deep-link');
@@ -71,13 +72,27 @@ export default function LoginScreen() {
           }
         });
 
-        const port = await start({
-          ports: [14200]
-        });
+        let port;
+        try {
+          port = await start({
+            ports: [14200, 14201, 14202] // Try a few ports
+          });
+          console.log('OAuth server started on port:', port);
+        } catch (e) {
+          console.error('Failed to start OAuth server:', e);
+          alert('Failed to start local server for login. Please check logs.');
+          return;
+        }
 
         const redirectUri = `http://localhost:${port}`;
+        console.log('--- OAuth Debug ---');
+        console.log('Redirect URI:', redirectUri);
+        console.log('Client ID:', clientId);
+        console.log('-------------------');
+
         const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=email%20profile%20openid`;
 
+        console.log('Opening Auth URL:', authUrl);
         await open(authUrl);
         return;
       }
@@ -87,7 +102,8 @@ export default function LoginScreen() {
       await signInWithPopup(auth, provider);
     } catch (error: any) {
       console.error('Error with Google sign in:', error);
-      alert(`Error al iniciar con Google: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : (typeof error === 'string' ? error : JSON.stringify(error));
+      alert(`Error al iniciar con Google: ${errorMessage}`);
     }
   };
 
