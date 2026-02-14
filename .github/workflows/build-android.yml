@@ -48,19 +48,17 @@ jobs:
             npx tauri android init --ci
           fi
 
+      - name: build android release
+        run: npx tauri android build --apk
+        env:
+          NDK_HOME: ${{ steps.setup-android.outputs.ndk-path }}
+
       - name: decode keystore
         id: decode_keystore
         uses: timheuer/base64-to-file@v1.2
         with:
           fileName: 'release-key.jks'
           encodedString: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-
-      - name: Print Keystore SHA-1
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-        run: |
-          keytool -list -v -keystore ${{ steps.decode_keystore.outputs.filePath }} -alias $KEY_ALIAS -storepass $KEYSTORE_PASSWORD
 
       - name: sign apk
         env:
