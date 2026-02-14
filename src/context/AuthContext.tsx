@@ -25,11 +25,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        console.log("AuthContext: Setting up onAuthStateChanged listener");
         const unsubscribe = onAuthStateChanged(auth, (user) => {
+            console.log("AuthContext: onAuthStateChanged triggered", user ? "User found" : "No user");
             setUser(user);
             setLoading(false);
         });
-        return unsubscribe;
+
+        // Force stop loading after 5 seconds if firebase doesn't respond to prevent infinite spinner
+        const timeoutId = setTimeout(() => {
+            setLoading((currentLoading) => {
+                if (currentLoading) {
+                    console.warn("AuthContext: Loading timed out (5s), forcing loading to false");
+                    return false;
+                }
+                return currentLoading;
+            });
+        }, 5000);
+
+        return () => {
+            clearTimeout(timeoutId);
+            unsubscribe();
+        };
     }, []);
 
     const signInAnonymously = async () => {
