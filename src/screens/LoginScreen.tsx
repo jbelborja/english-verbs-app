@@ -25,25 +25,37 @@ export default function LoginScreen() {
 
         if (isMobile) {
           const { onOpenUrl } = await import('@tauri-apps/plugin-deep-link');
-          const redirectUri = "com.jbelborja.englishverbsapp://auth";
-          const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=email%20profile%20openid`;
+          // For Android OAuth clients, use urn:ietf:wg:oauth:2.0:oob (out-of-band)
+          // The package name + SHA-1 fingerprint identify the app, not a redirect URI
+          const redirectUri = "urn:ietf:wg:oauth:2.0:oob";
+          const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email%20profile%20openid`;
 
           await onOpenUrl(async (urls) => {
             console.log('Received deep link urls:', urls);
             const url = urls[0];
-            if (url && url.includes('access_token')) {
+            // Handle both token and code responses
+            if (url && (url.includes('access_token') || url.includes('code='))) {
               try {
-                const hash = url.split('#')[1];
-                const params = new URLSearchParams(hash);
-                const accessToken = params.get('access_token');
-                const idToken = params.get('id_token');
+                if (url.includes('access_token')) {
+                  const hash = url.split('#')[1];
+                  const params = new URLSearchParams(hash);
+                  const accessToken = params.get('access_token');
+                  const idToken = params.get('id_token');
 
-                if (accessToken || idToken) {
-                  const credential = GoogleAuthProvider.credential(idToken, accessToken);
-                  await signInWithGoogleCredential(credential);
+                  if (accessToken || idToken) {
+                    const credential = GoogleAuthProvider.credential(idToken, accessToken);
+                    await signInWithGoogleCredential(credential);
+                  }
+                } else if (url.includes('code=')) {
+                  // Handle authorization code flow
+                  const urlParams = new URLSearchParams(url.split('?')[1]);
+                  const code = urlParams.get('code');
+                  console.log('Received authorization code:', code);
+                  // Note: You'll need to exchange this code for tokens on your backend
+                  alert('Authorization code received. Backend exchange not implemented yet.');
                 }
               } catch (e) {
-                console.error('Failed to handle deep link redirect', e);
+                console.error('Failed to handle OAuth redirect', e);
               }
             }
           });
