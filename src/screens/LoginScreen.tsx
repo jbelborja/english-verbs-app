@@ -45,7 +45,9 @@ export default function LoginScreen() {
             }
           });
 
-          await open(authUrl);
+          // On Android, use window.location.href instead of shell.open to bypass permission issues
+          console.log('Opening Google Auth URL on Android:', authUrl);
+          window.location.href = authUrl;
           return;
         }
 
