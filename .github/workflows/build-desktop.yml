@@ -72,7 +72,14 @@ jobs:
         run: |
           npm run build
           echo "Listing web build output (dist):"
-          ls -la dist || echo "dist directory not found"
+        shell: bash
+      
+      - name: List dist directory
+        if: ${{ matrix.enabled }}
+        run: |
+          if (Test-Path dist) { Get-ChildItem dist } else { Write-Host "dist directory not found" }
+        shell: pwsh
+        continue-on-error: true
 
       - name: Build Desktop App
         if: ${{ matrix.enabled }}
@@ -91,11 +98,12 @@ jobs:
           echo "Current directory: $(pwd)"
           
           echo "Listing src-tauri/target:"
-          ls -la src-tauri/target || echo "target not found"
+          if [ -d "src-tauri/target" ]; then ls -la src-tauri/target; else echo "target not found"; fi
           
           echo "Searching for all binaries (AppImage, deb, dmg, exe, msi):"
-          find src-tauri/target -name "*.AppImage" -o -name "*.deb" -o -name "*.dmg" -o -name "*.exe" -o -name "*.msi" -o -name "*.app"
+          find src-tauri/target -name "*.AppImage" -o -name "*.deb" -o -name "*.dmg" -o -name "*.exe" -o -name "*.msi" -o -name "*.app" 2>/dev/null || echo "No binaries found"
           echo "--- End Debug ---"
+        shell: bash
 
       - name: Upload Artifacts
         if: ${{ matrix.enabled }}
