@@ -10,6 +10,9 @@
     "beforeBuildCommand": "npm run build"
   },
   "app": {
+    "security": {
+      "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' ipc: http://ipc.localhost https://*.firebaseapp.com https://*.googleapis.com https://apis.google.com https://accounts.google.com; connect-src 'self' 'unsafe-inline' ipc: http://ipc.localhost https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net https://identitytoolkit.googleapis.com http://localhost:*; img-src 'self' data: https://*.googleusercontent.com; style-src 'self' 'unsafe-inline';"
+    },
     "windows": [
       {
         "title": "English Verbs",

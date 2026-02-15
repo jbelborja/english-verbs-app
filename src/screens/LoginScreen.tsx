@@ -84,7 +84,7 @@ export default function LoginScreen() {
           return;
         }
 
-        const redirectUri = `http://127.0.0.1:${port}`;
+        const redirectUri = `http://localhost:${port}`;
         console.log('--- OAuth Debug ---');
         console.log('Redirect URI:', redirectUri);
         console.log('Client ID:', clientId);
@@ -111,6 +111,7 @@ export default function LoginScreen() {
     try {
       await signInAnonymously();
     } catch (error: any) {
+      console.error('Anonymous sign in failed', error);
       alert(`Error de inicio anónimo: ${error.message}`);
     }
   };
