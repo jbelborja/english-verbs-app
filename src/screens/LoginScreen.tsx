@@ -16,9 +16,12 @@ export default function LoginScreen() {
 
       if (isTauri) {
         const { open } = await import('@tauri-apps/plugin-shell');
-        const clientId = "364645965860-sjietr9u3dcdvt8ieecekga0jp7ul37g.apps.googleusercontent.com";
+        // Use Android client ID for mobile, web client ID for desktop
+        const webClientId = "364645965860-sjietr9u3dcdvt8ieecekga0jp7ul37g.apps.googleusercontent.com";
+        const androidClientId = "364645965860-j2m30laq1notojgupjhqmuchq60q5n3p.apps.googleusercontent.com";
         const isMobile = window.navigator.userAgent.includes('Android') || window.navigator.userAgent.includes('iPhone') || window.navigator.userAgent.includes('iPad');
-        console.log("Login Environment - isTauri:", isTauri, "isMobile:", isMobile, "UserAgent:", window.navigator.userAgent);
+        const clientId = isMobile ? androidClientId : webClientId;
+        console.log("Login Environment - isTauri:", isTauri, "isMobile:", isMobile, "UserAgent:", window.navigator.userAgent, "ClientID:", clientId);
 
         if (isMobile) {
           const { onOpenUrl } = await import('@tauri-apps/plugin-deep-link');
