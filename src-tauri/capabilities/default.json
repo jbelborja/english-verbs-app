@@ -8,20 +8,7 @@
     "core:default",
     "oauth:allow-start",
     "oauth:allow-cancel",
-    {
-      "identifier": "shell:allow-open",
-      "scope": {
-        "allow": [
-          {
-            "schemes": [
-              "http",
-              "https"
-            ],
-            "host": "*"
-          }
-        ]
-      }
-    },
+    "shell:default",
     "deep-link:default"
   ]
 }
