@@ -27,13 +27,15 @@ export default function LoginScreen() {
           const { onOpenUrl } = await import('@tauri-apps/plugin-deep-link');
           const { openUrl } = await import('@tauri-apps/plugin-opener');
 
-          // Using iOS Client ID for mobile to support implicit flow on Android/iOS
-          const redirectUri = "com.googleusercontent.apps.364645965860-nqbdumepglaguhhr437tqas70aqb6ck0:/oauth2redirect";
-          // Use response_type=id_token with a nonce, as Google often blocks 'token' for native clients
-          const nonce = Math.random().toString(36).substring(2);
-          const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=id_token&scope=email%20profile%20openid&nonce=${nonce}`;
+          // Trying the alternative Client ID found in the manifest
+          const clientId = "364645965860-j2m30laq1notojgupjhqmuchq60q5n3p.apps.googleusercontent.com";
+          const redirectUri = `com.googleusercontent.apps.364645965860-j2m30laq1notojgupjhqmuchq60q5n3p:/oauth2redirect`;
 
-          console.log('--- MOBILE OAUTH DEBUG ---');
+          // Use id_token token with nonce - some native IDs require this specific combo
+          const nonce = Math.random().toString(36).substring(2);
+          const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=id_token%20token&scope=email%20profile%20openid&nonce=${nonce}`;
+
+          console.log('--- MOBILE OAUTH DEBUG (ALT ID) ---');
           console.log('Client ID:', clientId);
           console.log('Redirect URI:', redirectUri);
           console.log('Auth URL:', authUrl);
