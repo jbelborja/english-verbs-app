@@ -8,18 +8,7 @@
     "core:default",
     "oauth:allow-start",
     "oauth:allow-cancel",
-    "shell:allow-open",
     "deep-link:default",
-    {
-      "identifier": "shell:allow-open",
-      "allow": [
-        {
-          "schemes": [
-            "https",
-            "http"
-          ]
-        }
-      ]
-    }
+    "opener:allow-open-url"
   ]
 }

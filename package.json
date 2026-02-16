@@ -25,7 +25,8 @@
     "@tauri-apps/api": "^2.1.0",
     "@fabianlars/tauri-plugin-oauth": "^2.0.0",
     "@tauri-apps/plugin-shell": "^2.1.0",
-    "@tauri-apps/plugin-deep-link": "^2.1.0"
+    "@tauri-apps/plugin-deep-link": "^2.1.0",
+    "@tauri-apps/plugin-opener": "^2.1.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.1.0",

@@ -25,7 +25,7 @@ export default function LoginScreen() {
 
         if (isMobile) {
           const { onOpenUrl } = await import('@tauri-apps/plugin-deep-link');
-          const { open } = await import('@tauri-apps/plugin-shell');
+          const { openUrl } = await import('@tauri-apps/plugin-opener');
 
           // Using iOS Client ID for mobile to support implicit flow on Android/iOS
           const redirectUri = "com.googleusercontent.apps.364645965860-nqbdumepglaguhhr437tqas70aqb6ck0:/oauth2redirect";
@@ -55,11 +55,11 @@ export default function LoginScreen() {
             }
           });
 
-          console.log('Opening Google Auth URL via shell.open:', authUrl);
+          console.log('Opening Google Auth URL via opener.openUrl:', authUrl);
           try {
-            await open(authUrl);
+            await openUrl(authUrl);
           } catch (err) {
-            console.error('Failed to open shell:', err);
+            console.error('Failed to open URL:', err);
             // Fallback for debugging if shell still fails
             alert('Error opening browser: ' + JSON.stringify(err));
           }
@@ -68,6 +68,7 @@ export default function LoginScreen() {
 
         // Desktop Desktop / Generic Tauri Desktop fallback (OAuth plugin)
         const { start, onUrl } = await import('@fabianlars/tauri-plugin-oauth');
+        const { openUrl } = await import('@tauri-apps/plugin-opener');
 
         // Register listener before starting the server
         const unlisten = await onUrl(async (url: string) => {
@@ -110,7 +111,7 @@ export default function LoginScreen() {
         const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=email%20profile%20openid`;
 
         console.log('Opening Auth URL:', authUrl);
-        await open(authUrl);
+        await openUrl(authUrl);
         return;
       }
 
