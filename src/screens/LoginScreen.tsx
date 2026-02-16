@@ -25,9 +25,13 @@ export default function LoginScreen() {
 
         if (isMobile) {
           const { onOpenUrl } = await import('@tauri-apps/plugin-deep-link');
+          const { open } = await import('@tauri-apps/plugin-shell');
+
           // Using iOS Client ID for mobile to support implicit flow on Android/iOS
           const redirectUri = "com.googleusercontent.apps.364645965860-nqbdumepglaguhhr437tqas70aqb6ck0:/oauth2redirect";
-          const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token%20id_token&scope=email%20profile%20openid`;
+          // Use id_token for better compatibility with Firebase on mobile, add nonce
+          const nonce = Math.random().toString(36).substring(2);
+          const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=id_token%20token&scope=email%20profile%20openid&nonce=${nonce}`;
 
           await onOpenUrl(async (urls) => {
             console.log('Received deep link urls:', urls);
@@ -51,9 +55,14 @@ export default function LoginScreen() {
             }
           });
 
-          // On Android, use window.location.href instead of shell.open to bypass permission issues
-          console.log('Opening Google Auth URL on Android:', authUrl);
-          window.location.href = authUrl;
+          console.log('Opening Google Auth URL via shell.open:', authUrl);
+          try {
+            await open(authUrl);
+          } catch (err) {
+            console.error('Failed to open shell:', err);
+            // Fallback for debugging if shell still fails
+            alert('Error opening browser: ' + JSON.stringify(err));
+          }
           return;
         }
 

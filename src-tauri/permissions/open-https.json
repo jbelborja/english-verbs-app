@@ -1,0 +1,14 @@
+{
+    "identifier": "allow-all-https-open",
+    "description": "Allows opening any HTTPS URL in the default browser",
+    "commands": [
+        "open"
+    ],
+    "scope": {
+        "allow": [
+            {
+                "url": "https://**"
+            }
+        ]
+    }
+}
