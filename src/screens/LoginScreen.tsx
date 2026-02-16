@@ -29,8 +29,9 @@ export default function LoginScreen() {
 
           // Using iOS Client ID for mobile to support implicit flow on Android/iOS
           const redirectUri = "com.googleusercontent.apps.364645965860-nqbdumepglaguhhr437tqas70aqb6ck0:/oauth2redirect";
-          // Use response_type=token for better compatibility with native clients
-          const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=email%20profile%20openid`;
+          // Use response_type=id_token with a nonce, as Google often blocks 'token' for native clients
+          const nonce = Math.random().toString(36).substring(2);
+          const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=id_token&scope=email%20profile%20openid&nonce=${nonce}`;
 
           console.log('--- MOBILE OAUTH DEBUG ---');
           console.log('Client ID:', clientId);
@@ -44,7 +45,7 @@ export default function LoginScreen() {
             if (url && (url.includes('access_token') || url.includes('id_token'))) {
               try {
                 // Determine if parameters are in the hash (#) or search (?)
-                const delimiter = url.includes('#') ? '#' : '?';
+                const delimiter = url.includes('#') ? '#' : url.includes('?') ? '?' : '#';
                 const hashOrSearch = url.split(delimiter)[1];
                 const params = new URLSearchParams(hashOrSearch);
                 const accessToken = params.get('access_token');
