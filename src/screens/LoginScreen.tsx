@@ -18,15 +18,15 @@ export default function LoginScreen() {
         const { open } = await import('@tauri-apps/plugin-shell');
         // Use Android client ID for mobile, web client ID for desktop
         const webClientId = "364645965860-sjietr9u3dcdvt8ieecekga0jp7ul37g.apps.googleusercontent.com";
-        const androidClientId = "364645965860-j2m30laq1notojgupjhqmuchq60q5n3p.apps.googleusercontent.com";
+        const iosClientId = "364645965860-nqbdumepglaguhhr437tqas70aqb6ck0.apps.googleusercontent.com";
         const isMobile = window.navigator.userAgent.includes('Android') || window.navigator.userAgent.includes('iPhone') || window.navigator.userAgent.includes('iPad');
-        const clientId = isMobile ? androidClientId : webClientId;
+        const clientId = isMobile ? iosClientId : webClientId;
         console.log("Login Environment - isTauri:", isTauri, "isMobile:", isMobile, "UserAgent:", window.navigator.userAgent, "ClientID:", clientId);
 
         if (isMobile) {
           const { onOpenUrl } = await import('@tauri-apps/plugin-deep-link');
-          // Standard Google OAuth Redirect for Android Clients: reversed.client.id:/oauth2redirect
-          const redirectUri = "com.googleusercontent.apps.364645965860-j2m30laq1notojgupjhqmuchq60q5n3p:/oauth2redirect";
+          // Using iOS Client ID for mobile to support implicit flow on Android/iOS
+          const redirectUri = "com.googleusercontent.apps.364645965860-nqbdumepglaguhhr437tqas70aqb6ck0:/oauth2redirect";
           const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token%20id_token&scope=email%20profile%20openid`;
 
           await onOpenUrl(async (urls) => {

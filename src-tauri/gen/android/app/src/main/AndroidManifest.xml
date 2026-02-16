@@ -29,12 +29,13 @@
                 <data android:scheme="com.jbelborja.englishverbsapp" android:host="auth" />
             </intent-filter>
 
-            <!-- Standard Google OAuth Redirect for Android Clients -->
+            <!-- Standard Google OAuth Redirect for Mobile Clients (Reversed Client ID) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="com.googleusercontent.apps.364645965860-j2m30laq1notojgupjhqmuchq60q5n3p" />
+                <data android:scheme="com.googleusercontent.apps.364645965860-nqbdumepglaguhhr437tqas70aqb6ck0" />
             </intent-filter>
         </activity>
 
