@@ -39,11 +39,7 @@
       "open": true
     },
     "deep-link": {
-      "mobile": [
-        "com.jbelborja.englishverbsapp",
-        "com.googleusercontent.apps.364645965860-j2m30laq1notojgupjhqmuchq60q5n3p",
-        "com.googleusercontent.apps.364645965860-nqbdumepglaguhhr437tqas70aqb6ck0"
-      ],
+      "mobile": [],
       "desktop": {
         "schemes": [
           "com.jbelborja.englishverbsapp",
