@@ -2,15 +2,24 @@
   "identifier": "default",
   "description": "enables the default permissions",
   "windows": [
-    "main",
     "*"
   ],
   "permissions": [
     "core:default",
     "oauth:allow-start",
     "oauth:allow-cancel",
-    "shell:default",
+    "shell:allow-open",
     "deep-link:default",
-    "allow-all-https-open"
+    {
+      "identifier": "shell:allow-open",
+      "allow": [
+        {
+          "schemes": [
+            "https",
+            "http"
+          ]
+        }
+      ]
+    }
   ]
 }
