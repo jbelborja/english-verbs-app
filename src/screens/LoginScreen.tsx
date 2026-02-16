@@ -29,9 +29,14 @@ export default function LoginScreen() {
 
           // Using iOS Client ID for mobile to support implicit flow on Android/iOS
           const redirectUri = "com.googleusercontent.apps.364645965860-nqbdumepglaguhhr437tqas70aqb6ck0:/oauth2redirect";
-          // Use id_token for better compatibility with Firebase on mobile, add nonce
-          const nonce = Math.random().toString(36).substring(2);
-          const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=id_token%20token&scope=email%20profile%20openid&nonce=${nonce}`;
+          // Use response_type=token for better compatibility with native clients
+          const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=email%20profile%20openid`;
+
+          console.log('--- MOBILE OAUTH DEBUG ---');
+          console.log('Client ID:', clientId);
+          console.log('Redirect URI:', redirectUri);
+          console.log('Auth URL:', authUrl);
+          console.log('--------------------------');
 
           await onOpenUrl(async (urls) => {
             console.log('Received deep link urls:', urls);
