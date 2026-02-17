@@ -6,7 +6,10 @@ import {
     signOut as firebaseSignOut,
     GoogleAuthProvider,
     signInWithCredential,
-    AuthCredential
+    AuthCredential,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    sendPasswordResetEmail
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
 
@@ -15,6 +18,9 @@ interface AuthContextType {
     loading: boolean;
     signInAnonymously: () => Promise<void>;
     signInWithGoogleCredential: (credential: AuthCredential) => Promise<void>;
+    signInWithEmail: (email: string, pass: string) => Promise<void>;
+    signUp: (email: string, pass: string) => Promise<void>;
+    sendPasswordReset: (email: string) => Promise<void>;
     logout: () => Promise<void>;
 }
 
@@ -67,6 +73,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const signInWithEmail = async (email: string, pass: string) => {
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+        } catch (error) {
+            console.error('Email sign in failed', error);
+            throw error;
+        }
+    };
+
+    const signUp = async (email: string, pass: string) => {
+        try {
+            await createUserWithEmailAndPassword(auth, email, pass);
+        } catch (error) {
+            console.error('Registration failed', error);
+            throw error;
+        }
+    };
+
+    const sendPasswordReset = async (email: string) => {
+        try {
+            await sendPasswordResetEmail(auth, email);
+        } catch (error) {
+            console.error('Password reset failed', error);
+            throw error;
+        }
+    };
+
     const logout = async () => {
         try {
             await firebaseSignOut(auth);
@@ -76,8 +109,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const value = {
+        user,
+        loading,
+        signInAnonymously,
+        signInWithGoogleCredential,
+        signInWithEmail,
+        signUp,
+        sendPasswordReset,
+        logout
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, signInAnonymously, signInWithGoogleCredential, logout }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );

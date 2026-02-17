@@ -1,28 +1,42 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useSession, QuizResult } from '../context/SessionContext';
 import { theme } from '../styles/theme';
 
 export default function ProfileScreen() {
-    const { user } = useAuth();
-    const { history } = useSession();
+    const { user, logout } = useAuth();
+    const { history, loadingHistory } = useSession();
 
-    const renderItem = ({ item }: { item: QuizResult }) => (
-        <View style={styles.historyItem}>
-            <View>
-                <Text style={styles.historyDate}>{item.date.toLocaleDateString()} - {item.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                <Text style={styles.historyMode}>
-                    {item.mode === 'typed' ? 'Escritura' : item.mode === 'choice' ? 'Selección' : 'Arrastrar'}
-                </Text>
+    if (loadingHistory) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={theme.colors.primary} />
+                <Text style={styles.loadingText}>Cargando historial...</Text>
             </View>
-            <View style={styles.scoreBadge}>
-                <Text style={styles.historyScore}>
-                    {item.score}/{item.total}
-                </Text>
+        );
+    }
+
+    const renderItem = ({ item }: { item: QuizResult }) => {
+        // Ensure item.date is a Date object
+        const date = item.date instanceof Date ? item.date : new Date(item.date);
+
+        return (
+            <View style={styles.historyItem}>
+                <View>
+                    <Text style={styles.historyDate}>{date.toLocaleDateString()} - {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                    <Text style={styles.historyMode}>
+                        {item.mode === 'typed' ? 'Escritura' : item.mode === 'choice' ? 'Selección' : 'Arrastrar'}
+                    </Text>
+                </View>
+                <View style={styles.scoreBadge}>
+                    <Text style={styles.historyScore}>
+                        {item.score}/{item.total}
+                    </Text>
+                </View>
             </View>
-        </View>
-    );
+        );
+    };
 
     const userInitial = user?.email ? user.email[0].toUpperCase() : '?';
 
@@ -36,10 +50,14 @@ export default function ProfileScreen() {
                     {user?.isAnonymous ? 'Usuario Anónimo' : user?.email}
                 </Text>
                 <Text style={styles.statsLabel}>Has completado {history.length} sesiones</Text>
+
+                <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+                    <Text style={styles.logoutText}>Cerrar Sesión</Text>
+                </TouchableOpacity>
             </View>
 
             <View style={styles.historySection}>
-                <Text style={styles.sectionTitle}>Historial de Sesión</Text>
+                <Text style={styles.sectionTitle}>Historial Completo</Text>
 
                 {history.length === 0 ? (
                     <View style={styles.emptyContainer}>
@@ -156,5 +174,28 @@ const styles = StyleSheet.create({
         color: theme.colors.textLight,
         textAlign: 'center',
         marginTop: 4,
+    },
+    logoutButton: {
+        marginTop: theme.spacing.md,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: theme.roundness.md,
+        backgroundColor: '#FEE2E2',
+    },
+    logoutText: {
+        color: theme.colors.error,
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: theme.colors.background,
+    },
+    loadingText: {
+        marginTop: 10,
+        color: theme.colors.textSecondary,
+        ...theme.typography.body,
     },
 });
