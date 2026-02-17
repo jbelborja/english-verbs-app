@@ -16,46 +16,80 @@ export default function LoginScreen() {
 
       if (isTauri) {
         const { open } = await import('@tauri-apps/plugin-shell');
-        // Use Android client ID for mobile, web client ID for desktop
-        const webClientId = "364645965860-sjietr9u3dcdvt8ieecekga0jp7ul37g.apps.googleusercontent.com";
-        const iosClientId = "364645965860-nqbdumepglaguhhr437tqas70aqb6ck0.apps.googleusercontent.com";
         const isMobile = window.navigator.userAgent.includes('Android') || window.navigator.userAgent.includes('iPhone') || window.navigator.userAgent.includes('iPad');
-        const clientId = isMobile ? iosClientId : webClientId;
-        console.log("Login Environment - isTauri:", isTauri, "isMobile:", isMobile, "UserAgent:", window.navigator.userAgent, "ClientID:", clientId);
 
         if (isMobile) {
           const { onOpenUrl } = await import('@tauri-apps/plugin-deep-link');
           const { openUrl } = await import('@tauri-apps/plugin-opener');
 
-          // Trying the alternative Client ID found in the manifest
+          // Android Client ID from Google Cloud Console
           const clientId = "364645965860-j2m30laq1notojgupjhqmuchq60q5n3p.apps.googleusercontent.com";
           const redirectUri = `com.googleusercontent.apps.364645965860-j2m30laq1notojgupjhqmuchq60q5n3p:/oauth2redirect`;
 
-          // Use id_token token with nonce - some native IDs require this specific combo
-          const nonce = Math.random().toString(36).substring(2);
-          const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=id_token%20token&scope=email%20profile%20openid&nonce=${nonce}`;
+          // PKCE Helpers (Minimal Implementation for Browser Environments)
+          const generateRandomString = (length: number) => {
+            const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+              result += charset.charAt(Math.floor(Math.random() * charset.length));
+            }
+            return result;
+          };
 
-          console.log('--- MOBILE OAUTH DEBUG (ALT ID) ---');
+          const sha256 = async (plain: string) => {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(plain);
+            const hash = await window.crypto.subtle.digest('SHA-256', data);
+            return hash;
+          };
+
+          const base64urlencode = (a: ArrayBuffer) => {
+            return btoa(String.fromCharCode.apply(null, new Uint8Array(a) as any))
+              .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+          };
+
+          const codeVerifier = generateRandomString(64);
+          const codeChallenge = base64urlencode(await sha256(codeVerifier));
+
+          const state = generateRandomString(16);
+          const scope = encodeURIComponent('email profile openid');
+          const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+
+          console.log('--- MOBILE OAUTH DEBUG (CODE FLOW + PKCE) ---');
           console.log('Client ID:', clientId);
           console.log('Redirect URI:', redirectUri);
           console.log('Auth URL:', authUrl);
-          console.log('--------------------------');
 
           await onOpenUrl(async (urls) => {
             console.log('Received deep link urls:', urls);
             const url = urls[0];
-            if (url && (url.includes('access_token') || url.includes('id_token'))) {
+            if (url && url.includes('code=')) {
               try {
-                // Determine if parameters are in the hash (#) or search (?)
-                const delimiter = url.includes('#') ? '#' : url.includes('?') ? '?' : '#';
-                const hashOrSearch = url.split(delimiter)[1];
-                const params = new URLSearchParams(hashOrSearch);
-                const accessToken = params.get('access_token');
-                const idToken = params.get('id_token');
+                const params = new URLSearchParams(url.split('?')[1] || url.split('#')[1] || '');
+                const code = params.get('code');
+                const returnedState = params.get('state');
 
-                if (accessToken || idToken) {
-                  const credential = GoogleAuthProvider.credential(idToken, accessToken);
-                  await signInWithGoogleCredential(credential);
+                if (code && returnedState === state) {
+                  // Exchange code for tokens
+                  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                      client_id: clientId,
+                      code: code,
+                      code_verifier: codeVerifier,
+                      grant_type: 'authorization_code',
+                      redirect_uri: redirectUri,
+                    }).toString(),
+                  });
+
+                  const tokens = await tokenResponse.json();
+                  if (tokens.id_token) {
+                    const credential = GoogleAuthProvider.credential(tokens.id_token, tokens.access_token);
+                    await signInWithGoogleCredential(credential);
+                  } else {
+                    console.error('Failed to get tokens:', tokens);
+                  }
                 }
               } catch (e) {
                 console.error('Failed to handle OAuth redirect', e);
@@ -63,27 +97,19 @@ export default function LoginScreen() {
             }
           });
 
-          console.log('Opening Google Auth URL via opener.openUrl:', authUrl);
-          try {
-            await openUrl(authUrl);
-          } catch (err) {
-            console.error('Failed to open URL:', err);
-            // Fallback for debugging if shell still fails
-            alert('Error opening browser: ' + JSON.stringify(err));
-          }
+          await openUrl(authUrl);
           return;
         }
 
-        // Desktop Desktop / Generic Tauri Desktop fallback (OAuth plugin)
+        // Desktop Flow (Existing but cleaned up)
         const { start, onUrl } = await import('@fabianlars/tauri-plugin-oauth');
         const { openUrl } = await import('@tauri-apps/plugin-opener');
 
-        // Register listener before starting the server
+        const clientId = "364645965860-sjietr9u3dcdvt8ieecekga0jp7ul37g.apps.googleusercontent.com"; // Web Client ID for Desktop
+
         const unlisten = await onUrl(async (url: string) => {
-          console.log('Received OAuth redirect:', url);
           try {
-            const hash = url.split('#')[1];
-            const params = new URLSearchParams(hash);
+            const params = new URLSearchParams(url.split('#')[1] || url.split('?')[1]);
             const accessToken = params.get('access_token');
             const idToken = params.get('id_token');
 
@@ -91,34 +117,16 @@ export default function LoginScreen() {
               const credential = GoogleAuthProvider.credential(idToken, accessToken);
               await signInWithGoogleCredential(credential);
             }
-            // Optional: unlisten() if you only want one-time behavior
-            // unlisten();
+            unlisten();
           } catch (e) {
             console.error('Failed to handle OAuth redirect', e);
           }
         });
 
-        let port;
-        try {
-          port = await start({
-            ports: [14200, 14201, 14202] // Try a few ports
-          });
-          console.log('OAuth server started on port:', port);
-        } catch (e) {
-          console.error('Failed to start OAuth server:', e);
-          alert('Failed to start local server for login. Please check logs.');
-          return;
-        }
-
+        const port = await start({ ports: [14200, 14201, 14202] });
         const redirectUri = `http://localhost:${port}`;
-        console.log('--- OAuth Debug ---');
-        console.log('Redirect URI:', redirectUri);
-        console.log('Client ID:', clientId);
-        console.log('-------------------');
-
         const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=email%20profile%20openid`;
 
-        console.log('Opening Auth URL:', authUrl);
         await openUrl(authUrl);
         return;
       }
