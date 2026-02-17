@@ -116,7 +116,7 @@ export default function QuizScreen({ navigation, route }: Props) {
 
         if (mode === 'choice') {
             const answerToUse = choiceAnswer !== undefined ? choiceAnswer : userAnswer;
-            questionScore = engine.getAnswerScore(currentQuestion, answerToUse);
+            questionScore = engine.getAnswerScore(currentQuestion, answerToUse, undefined, false);
             allCorrect = questionScore === 1.0;
         } else if (mode === 'drag') {
             const fieldsToVerify = currentQuestion.answerFields || [];

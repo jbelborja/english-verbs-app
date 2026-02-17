@@ -26,9 +26,22 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
     // Load history when user changes
     useEffect(() => {
+        let timeoutId: NodeJS.Timeout;
+
         const loadHistory = async () => {
             if (user) {
                 setLoadingHistory(true);
+
+                // Failsafe: stop loading after 8 seconds no matter what
+                timeoutId = setTimeout(() => {
+                    setLoadingHistory(current => {
+                        if (current) {
+                            console.warn('SessionContext: History loading timed out (8s)');
+                        }
+                        return false;
+                    });
+                }, 8000);
+
                 try {
                     const onlineHistory = await userService.getQuizHistory(user.uid);
                     setHistory(onlineHistory);
@@ -36,6 +49,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
                     console.error('Failed to load history:', error);
                 } finally {
                     setLoadingHistory(false);
+                    clearTimeout(timeoutId);
                 }
             } else {
                 setHistory([]);
@@ -43,6 +57,10 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         };
 
         loadHistory();
+
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+        };
     }, [user]);
 
     const addResult = async (result: Omit<QuizResult, 'id' | 'date'>) => {

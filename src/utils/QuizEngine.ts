@@ -117,7 +117,7 @@ export class QuizEngine {
     }
 
     // Get score for an answer (0, 0.5, or 1)
-    getAnswerScore(question: Question, userAnswer: string, field?: QuestionField): number {
+    getAnswerScore(question: Question, userAnswer: string, field?: QuestionField, allowHalfPoints: boolean = true): number {
         const targetField = field || question.answerField;
         if (!targetField) return 0;
 
@@ -126,7 +126,13 @@ export class QuizEngine {
 
         let maxScore = 0;
         for (const valid of validAnswers) {
-            const score = checkAnswerWithMisspelling(userAnswer, valid);
+            let score = checkAnswerWithMisspelling(userAnswer, valid);
+
+            // If half points are not allowed and we got a 0.5, treat as 0
+            if (!allowHalfPoints && score === 0.5) {
+                score = 0;
+            }
+
             if (score > maxScore) {
                 maxScore = score;
             }

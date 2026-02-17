@@ -38,16 +38,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setLoading(false);
         });
 
-        // Force stop loading after 5 seconds if firebase doesn't respond to prevent infinite spinner
+        // Force stop loading after 10 seconds if firebase doesn't respond to prevent infinite spinner
         const timeoutId = setTimeout(() => {
             setLoading((currentLoading) => {
                 if (currentLoading) {
-                    console.warn("AuthContext: Loading timed out (5s), forcing loading to false");
+                    console.warn("AuthContext: Loading timed out (10s), forcing loading to false");
                     return false;
                 }
                 return currentLoading;
             });
-        }, 5000);
+        }, 10000);
 
         return () => {
             clearTimeout(timeoutId);
