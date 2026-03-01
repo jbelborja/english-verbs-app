@@ -1,55 +1,53 @@
-import {
-    collection,
-    addDoc,
-    query,
-    where,
-    orderBy,
-    getDocs,
-    Timestamp,
-    limit
-} from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabase } from '../config/supabase';
 import { QuizResult } from '../context/SessionContext';
 
 export const userService = {
     /**
-     * Saves a quiz result to Firestore
+     * Saves a quiz result to Supabase
      */
     async saveQuizResult(userId: string, result: Omit<QuizResult, 'id' | 'date'>) {
         try {
-            const resultsRef = collection(db, 'users', userId, 'results');
-            await addDoc(resultsRef, {
-                ...result,
-                date: Timestamp.now(),
-            });
-            console.log('Quiz result saved to Firestore');
+            const { error } = await supabase
+                .from('quiz_results')
+                .insert({
+                    user_id: userId,
+                    score: result.score,
+                    total: result.total,
+                    mode: result.mode,
+                    date: new Date().toISOString(),
+                });
+
+            if (error) throw error;
+            console.log('Quiz result saved to Supabase');
         } catch (error) {
-            console.error('Error saving quiz result to Firestore:', error);
+            console.error('Error saving quiz result to Supabase:', error);
             throw error;
         }
     },
 
     /**
-     * Fetches the quiz history for a user
+     * Fetches the quiz history for a user from Supabase
      */
     async getQuizHistory(userId: string): Promise<QuizResult[]> {
         try {
-            const resultsRef = collection(db, 'users', userId, 'results');
-            const q = query(resultsRef, orderBy('date', 'desc'), limit(50));
-            const querySnapshot = await getDocs(q);
+            const { data, error } = await supabase
+                .from('quiz_results')
+                .select('*')
+                .eq('user_id', userId)
+                .order('date', { ascending: false })
+                .limit(50);
 
-            return querySnapshot.docs.map(doc => {
-                const data = doc.data();
-                return {
-                    id: doc.id,
-                    score: data.score,
-                    total: data.total,
-                    mode: data.mode,
-                    date: data.date instanceof Timestamp ? data.date.toDate() : new Date(data.date),
-                } as QuizResult;
-            });
+            if (error) throw error;
+
+            return (data || []).map(row => ({
+                id: row.id,
+                score: row.score,
+                total: row.total,
+                mode: row.mode,
+                date: new Date(row.date),
+            })) as QuizResult[];
         } catch (error) {
-            console.error('Error fetching quiz history from Firestore:', error);
+            console.error('Error fetching quiz history from Supabase:', error);
             return [];
         }
     }
