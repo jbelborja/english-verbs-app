@@ -186,11 +186,11 @@ export default function QuizScreen({ navigation, route }: Props) {
                 <View style={styles.topSection}>
                     <View style={styles.progressHeader}>
                         <View>
-                            <Text style={styles.eyebrow}>✨ ¡Reto en marcha!</Text>
+                            <Text style={styles.eyebrow}>¡Reto en marcha!</Text>
                             <Text style={styles.counterText}>Pregunta {questionCount} de {TOTAL_QUESTIONS}</Text>
                         </View>
                         <View style={styles.scorePill}>
-                            <Text style={styles.scoreText}>⭐ {score} puntos</Text>
+                            <Text style={styles.scoreText}>{score} puntos</Text>
                         </View>
                     </View>
                     <View style={styles.progressBarBg}>

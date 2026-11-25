@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5578f5"/>
+      <stop offset="1" stop-color="#7451d2"/>
+    </linearGradient>
+    <linearGradient id="pages" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#eaf0ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="32" y="32" width="960" height="960" rx="230" fill="url(#background)"/>
+  <path d="M512 333c-94-66-206-79-315-43v365c110-34 222-20 315 47 93-67 205-81 315-47V290c-109-36-221-23-315 43Z" fill="#382c9b" opacity=".22" transform="translate(0 22)"/>
+  <path d="M512 333c-94-66-206-79-315-43v365c110-34 222-20 315 47 93-67 205-81 315-47V290c-109-36-221-23-315 43Z" fill="url(#pages)" stroke="#fff" stroke-linejoin="round" stroke-width="24"/>
+  <path d="M512 333v369" fill="none" stroke="#c7d2f6" stroke-linecap="round" stroke-width="22"/>
+  <path d="M267 385c65-14 129-6 184 21M267 455c65-14 129-6 184 21M267 525c65-14 129-6 184 21M757 385c-65-14-129-6-184 21M757 455c-65-14-129-6-184 21M757 525c-65-14-129-6-184 21" fill="none" stroke="#aab9ec" stroke-linecap="round" stroke-width="18"/>
+  <path d="m760 183 27 57 62 8-46 42 12 61-55-31-55 31 12-61-46-42 62-8 27-57Z" fill="#ffd45c" stroke="#fff0b5" stroke-linejoin="round" stroke-width="14"/>
+  <circle cx="238" cy="680" r="44" fill="#ffca55"/>
+  <path d="m218 680 14 15 29-34" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="13"/>
+</svg>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { Image, ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import tw from 'twrnc';
@@ -50,7 +50,7 @@ export default function HomeScreen({ navigation }: Props) {
                         </Text>
                     </View>
                     <View style={styles.heroArt}>
-                        <Text style={styles.heroEmoji}>🦸‍♀️</Text>
+                        <Image source={require('../../assets/icon.png')} style={styles.heroImage} />
                         <Text style={styles.heroSparkle}>✨</Text>
                     </View>
                 </View>
@@ -99,8 +99,8 @@ const styles = {
     eyebrow: tw`mb-2 text-sm font-bold text-[#315b9a]`,
     title: tw`mb-2 text-[30px] font-black text-[#172554]`,
     subtitle: tw`max-w-[620px] text-base leading-6 text-[#465779]`,
-    heroArt: tw`ml-2 h-[92px] w-[92px] items-center justify-center rounded-full bg-[#d5e7ff]`,
-    heroEmoji: tw`text-[54px]`,
+    heroArt: tw`ml-2 h-[100px] w-[100px] items-center justify-center`,
+    heroImage: tw`h-[82px] w-[82px]`,
     heroSparkle: [tw`absolute right-2 top-1 text-2xl`, { right: 4, top: 0 }],
     sectionTitle: tw`mb-4 text-xl font-black text-[#172554]`,
     cardContainer: tw`gap-3`,
