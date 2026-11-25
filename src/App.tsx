@@ -16,7 +16,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { SessionProvider } from './context/SessionContext';
 
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
-import { theme } from './styles/theme';
+import tw from 'twrnc';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Drawer = createDrawerNavigator<RootStackParamList>();
@@ -27,34 +27,18 @@ function CustomDrawerContent(props: any) {
 
   return (
     <DrawerContentScrollView {...props}>
-      <View style={{
-        padding: 20,
-        backgroundColor: theme.colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: theme.colors.border,
-        marginBottom: 10,
-        alignItems: 'center',
-        flexDirection: 'row',
-      }}>
-        <View style={{
-          width: 50,
-          height: 50,
-          borderRadius: 25,
-          backgroundColor: theme.colors.secondary,
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginRight: 15,
-        }}>
-          <Text style={{ color: theme.colors.white, fontWeight: 'bold', fontSize: 20 }}>
+      <View style={styles.drawerHeader}>
+        <View style={styles.drawerAvatar}>
+          <Text style={styles.drawerAvatarText}>
             {userInitial}
           </Text>
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ color: theme.colors.text, fontWeight: 'bold', fontSize: 16 }} numberOfLines={1}>
-            {user?.isAnonymous ? 'Usuario Anónimo' : user?.email}
+          <Text style={styles.drawerName} numberOfLines={1}>
+            {user?.isAnonymous ? '¡Hola, héroe!' : user?.email}
           </Text>
-          <Text style={{ color: theme.colors.textSecondary, fontSize: 12 }}>
-            Verbos en Inglés
+          <Text style={styles.drawerCaption}>
+            Tu aventura de inglés
           </Text>
         </View>
       </View>
@@ -62,7 +46,7 @@ function CustomDrawerContent(props: any) {
       <DrawerItem
         label="Cerrar Sesión"
         onPress={logout}
-        labelStyle={{ color: theme.colors.error, fontWeight: 'bold' }}
+        labelStyle={styles.logoutLabel}
       />
     </DrawerContentScrollView>
   );
@@ -74,14 +58,16 @@ function AuthenticatedNavigator() {
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         headerStyle: {
-          backgroundColor: theme.colors.white,
+          backgroundColor: '#ffffff',
         },
-        headerTintColor: theme.colors.primary,
+        headerTintColor: '#4f46e5',
         headerTitleStyle: {
-          fontWeight: 'bold',
+          fontWeight: '900',
+          color: '#172554',
         },
-        drawerActiveTintColor: theme.colors.primary,
-        drawerInactiveTintColor: theme.colors.textSecondary,
+        drawerActiveTintColor: '#4f46e5',
+        drawerInactiveTintColor: '#65718a',
+        drawerActiveBackgroundColor: '#eee7ff',
       }}
     >
       <Drawer.Screen
@@ -104,8 +90,8 @@ function AppNavigator() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#4f6df5" />
       </View>
     );
   }
@@ -113,9 +99,9 @@ function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{
-        headerStyle: { backgroundColor: theme.colors.white },
-        headerTintColor: theme.colors.primary,
-        headerTitleStyle: { fontWeight: 'bold' }
+        headerStyle: { backgroundColor: '#ffffff' },
+        headerTintColor: '#4f46e5',
+        headerTitleStyle: { fontWeight: '900', color: '#172554' }
       }}>
         {user ? (
           <>
@@ -169,3 +155,13 @@ export default function App() {
     </AuthProvider>
   );
 }
+
+const styles = {
+  drawerHeader: tw`mb-2 flex-row items-center border-b border-[#e7ecf6] bg-white p-5`,
+  drawerAvatar: tw`mr-4 h-[50px] w-[50px] items-center justify-center rounded-full bg-[#7154d9]`,
+  drawerAvatarText: tw`text-xl font-black text-white`,
+  drawerName: tw`text-base font-black text-[#172554]`,
+  drawerCaption: tw`text-xs text-[#65718a]`,
+  logoutLabel: tw`font-bold text-[#dc2626]`,
+  loading: tw`flex-1 items-center justify-center bg-[#f5f8ff]`,
+};

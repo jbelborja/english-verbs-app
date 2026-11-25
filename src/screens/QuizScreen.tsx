@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, useWindowDimensions } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { QuizEngine, Question, QuestionField } from '../utils/QuizEngine';
-import { theme } from '../styles/theme';
+import tw from 'twrnc';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Quiz'>;
 
@@ -34,6 +34,8 @@ const WordBubble = ({ option, onPress, disabled }: { option: DragOption, onPress
 
 export default function QuizScreen({ navigation, route }: Props) {
     const { mode } = route.params;
+    const { width } = useWindowDimensions();
+    const isWide = width >= 760;
     const [engine] = useState(() => new QuizEngine());
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
     const [options, setOptions] = useState<string[]>([]);
@@ -180,17 +182,23 @@ export default function QuizScreen({ navigation, route }: Props) {
             keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
         >
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                <View style={styles.page}>
                 <View style={styles.topSection}>
                     <View style={styles.progressHeader}>
-                        <Text style={styles.counterText}>Pregunta {questionCount} de {TOTAL_QUESTIONS}</Text>
-                        <Text style={styles.scoreText}>Puntos: {score}</Text>
+                        <View>
+                            <Text style={styles.eyebrow}>✨ ¡Reto en marcha!</Text>
+                            <Text style={styles.counterText}>Pregunta {questionCount} de {TOTAL_QUESTIONS}</Text>
+                        </View>
+                        <View style={styles.scorePill}>
+                            <Text style={styles.scoreText}>⭐ {score} puntos</Text>
+                        </View>
                     </View>
                     <View style={styles.progressBarBg}>
                         <View style={[styles.progressBarFill, { width: `${progress * 100}%` }]} />
                     </View>
                 </View>
 
-                <View style={styles.card}>
+                <View style={[styles.card, isWide && styles.cardWide]}>
                     <Text style={styles.promptLabel}>
                         {mode === 'typed' ? 'Completa las formas:' :
                             mode === 'drag' ? 'Ordena las palabras:' :
@@ -275,10 +283,10 @@ export default function QuizScreen({ navigation, route }: Props) {
 
                                     if (isActuallyCorrect) {
                                         buttonStyles.push(styles.optionButtonCorrect);
-                                        textStyle = [textStyle, { color: theme.colors.white }];
+                                        textStyle = [textStyle, styles.optionTextOnColor];
                                     } else if (isSelected) {
                                         buttonStyles.push(styles.optionButtonIncorrect);
-                                        textStyle = [textStyle, { color: theme.colors.white }];
+                                        textStyle = [textStyle, styles.optionTextOnColor];
                                     }
                                 }
 
@@ -320,7 +328,7 @@ export default function QuizScreen({ navigation, route }: Props) {
                                 </TouchableOpacity>
                             )
                         ) : (
-                            <TouchableOpacity style={[styles.mainButton, { backgroundColor: theme.colors.secondary }]} onPress={handleNext}>
+                            <TouchableOpacity style={[styles.mainButton, styles.nextButton]} onPress={handleNext}>
                                 <Text style={styles.buttonText}>
                                     {questionCount >= TOTAL_QUESTIONS ? 'Ver Resultados' : 'Siguiente'}
                                 </Text>
@@ -328,213 +336,57 @@ export default function QuizScreen({ navigation, route }: Props) {
                         )}
                     </View>
                 </View>
+                </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: theme.colors.background,
-    },
-    scrollContent: {
-        padding: theme.spacing.lg,
-        paddingBottom: theme.spacing.xl * 2,
-    },
-    topSection: {
-        marginBottom: theme.spacing.lg,
-    },
-    progressHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: theme.spacing.sm,
-    },
-    counterText: {
-        ...theme.typography.caption,
-        color: theme.colors.textSecondary,
-    },
-    scoreText: {
-        ...theme.typography.caption,
-        fontWeight: 'bold',
-        color: theme.colors.primary,
-    },
-    progressBarBg: {
-        height: 8,
-        backgroundColor: theme.colors.border,
-        borderRadius: 4,
-        overflow: 'hidden',
-    },
-    progressBarFill: {
-        height: '100%',
-        backgroundColor: theme.colors.primary,
-    },
-    card: {
-        backgroundColor: theme.colors.white,
-        borderRadius: theme.roundness.xl,
-        padding: theme.spacing.xl,
-        ...theme.shadows.md,
-    },
-    promptLabel: {
-        ...theme.typography.caption,
-        color: theme.colors.textLight,
-        textTransform: 'uppercase',
-        letterSpacing: 1,
-    },
-    promptText: {
-        ...theme.typography.h1,
-        color: theme.colors.text,
-        marginVertical: theme.spacing.xs,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: theme.colors.border,
-        marginBottom: theme.spacing.lg,
-    },
-    typedContainer: {
-        gap: theme.spacing.md,
-        marginBottom: theme.spacing.lg,
-    },
-    inputWrapper: {
-        gap: 4,
-    },
-    inputLabel: {
-        ...theme.typography.caption,
-        color: theme.colors.textSecondary,
-        fontWeight: '600',
-    },
-    input: {
-        borderWidth: 2,
-        borderColor: theme.colors.border,
-        borderRadius: theme.roundness.lg,
-        padding: theme.spacing.md,
-        fontSize: 16,
-        color: theme.colors.text,
-        backgroundColor: theme.colors.background,
-    },
-    inputCorrect: {
-        borderColor: theme.colors.success,
-        backgroundColor: '#ECFDF5',
-    },
-    inputWarning: {
-        borderColor: '#F59E0B',
-        backgroundColor: '#FFFBEB',
-    },
-    inputIncorrect: {
-        borderColor: theme.colors.error,
-        backgroundColor: '#FEF2F2',
-    },
-    dragContainer: {
-        marginBottom: theme.spacing.lg,
-    },
-    slotsRow: {
-        flexDirection: 'row',
-        gap: theme.spacing.sm,
-        marginBottom: theme.spacing.xl,
-    },
-    slotWrapper: {
-        flex: 1,
-        gap: 4,
-    },
-    slot: {
-        height: 50,
-        borderWidth: 2,
-        borderColor: theme.colors.border,
-        borderStyle: 'dashed',
-        borderRadius: theme.roundness.md,
-        backgroundColor: theme.colors.background,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    slotText: {
-        ...theme.typography.body,
-        fontWeight: 'bold',
-        color: theme.colors.primary,
-    },
-    optionsPool: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: theme.spacing.sm,
-        justifyContent: 'center',
-        padding: theme.spacing.md,
-        backgroundColor: '#F8FAFC',
-        borderRadius: theme.roundness.lg,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-    },
-    dragOption: {
-        backgroundColor: theme.colors.white,
-        paddingHorizontal: theme.spacing.md,
-        paddingVertical: theme.spacing.sm,
-        borderRadius: theme.roundness.full,
-        borderWidth: 1,
-        borderColor: theme.colors.primary,
-        ...theme.shadows.sm,
-    },
-    dragOptionText: {
-        ...theme.typography.body,
-        color: theme.colors.primary,
-        fontWeight: '600',
-    },
-    optionsContainer: {
-        gap: theme.spacing.sm,
-        marginBottom: theme.spacing.lg,
-    },
-    optionButton: {
-        backgroundColor: theme.colors.white,
-        padding: theme.spacing.md,
-        borderRadius: theme.roundness.lg,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-        alignItems: 'center',
-    },
-    optionButtonCorrect: {
-        backgroundColor: theme.colors.success,
-        borderColor: theme.colors.success,
-    },
-    optionButtonIncorrect: {
-        backgroundColor: theme.colors.error,
-        borderColor: theme.colors.error,
-    },
-    optionText: {
-        ...theme.typography.h3,
-        color: theme.colors.text,
-    },
-    feedbackBox: {
-        padding: theme.spacing.md,
-        borderRadius: theme.roundness.lg,
-        marginBottom: theme.spacing.lg,
-        alignItems: 'center',
-    },
-    feedbackBoxCorrect: {
-        backgroundColor: '#ECFDF5',
-    },
-    feedbackBoxIncorrect: {
-        backgroundColor: '#FEF2F2',
-    },
-    feedbackText: {
-        ...theme.typography.body,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: theme.colors.text,
-    },
-    actionContainer: {
-        marginTop: theme.spacing.xs,
-    },
-    mainButton: {
-        backgroundColor: theme.colors.primary,
-        padding: theme.spacing.md,
-        borderRadius: theme.roundness.lg,
-        alignItems: 'center',
-        ...theme.shadows.sm,
-    },
-    buttonDisabled: {
-        backgroundColor: theme.colors.textLight,
-        opacity: 0.5,
-    },
-    buttonText: {
-        color: theme.colors.white,
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-});
+const styles = {
+    container: tw`flex-1 bg-[#f5f8ff]`,
+    scrollContent: tw`px-4 pb-10 pt-5`,
+    page: [tw`w-full self-center`, { maxWidth: 900 }],
+    topSection: tw`mb-5`,
+    progressHeader: tw`mb-3 flex-row items-center justify-between`,
+    eyebrow: tw`mb-1 text-sm font-black text-[#7046d8]`,
+    counterText: tw`text-sm font-bold text-[#52617f]`,
+    scorePill: tw`rounded-full bg-[#fff2cc] px-4 py-2`,
+    scoreText: tw`text-sm font-black text-[#815c00]`,
+    progressBarBg: tw`h-3 overflow-hidden rounded-full bg-[#e1e8f5]`,
+    progressBarFill: tw`h-full rounded-full bg-[#19a879]`,
+    card: tw`rounded-3xl border border-[#e7ecf6] bg-white p-5 shadow-sm`,
+    cardWide: tw`p-8`,
+    promptLabel: tw`text-sm font-black uppercase tracking-wider text-[#73809a]`,
+    promptText: tw`my-2 text-[30px] font-black text-[#172554]`,
+    divider: tw`mb-5 h-px bg-[#e7ecf6]`,
+    typedContainer: tw`mb-5 gap-4`,
+    inputWrapper: tw`gap-1`,
+    inputLabel: tw`text-sm font-bold text-[#52617f]`,
+    input: tw`min-h-[54px] rounded-2xl border-2 border-[#dce4f2] bg-[#fbfcff] px-4 py-3 text-lg text-[#172554]`,
+    inputCorrect: tw`border-[#19a879] bg-[#e8faf3]`,
+    inputWarning: tw`border-[#f59e0b] bg-[#fffbeb]`,
+    inputIncorrect: tw`border-[#ef4444] bg-[#fff0f0]`,
+    dragContainer: tw`mb-5`,
+    slotsRow: tw`mb-6 flex-row gap-2`,
+    slotWrapper: tw`flex-1 gap-1`,
+    slot: tw`h-[54px] items-center justify-center rounded-xl border-2 border-dashed border-[#b8c5dd] bg-[#f8faff]`,
+    slotText: tw`text-base font-black text-[#4f46e5]`,
+    optionsPool: tw`flex-row flex-wrap justify-center gap-2 rounded-2xl border border-[#e7ecf6] bg-[#f8faff] p-4`,
+    dragOption: tw`rounded-full border border-[#4f6df5] bg-white px-4 py-2 shadow-sm`,
+    dragOptionText: tw`text-base font-bold text-[#4f46e5]`,
+    optionsContainer: tw`mb-5 gap-3`,
+    optionButton: tw`min-h-[58px] items-center justify-center rounded-2xl border-2 border-[#e1e8f5] bg-[#fbfcff] p-4`,
+    optionButtonCorrect: tw`border-[#19a879] bg-[#19a879]`,
+    optionButtonIncorrect: tw`border-[#ef4444] bg-[#ef4444]`,
+    optionText: tw`text-xl font-black text-[#172554]`,
+    optionTextOnColor: tw`text-white`,
+    feedbackBox: tw`mb-5 items-center rounded-2xl p-4`,
+    feedbackBoxCorrect: tw`bg-[#e8faf3]`,
+    feedbackBoxIncorrect: tw`bg-[#fff0f0]`,
+    feedbackText: tw`text-center text-base font-extrabold leading-6 text-[#172554]`,
+    actionContainer: tw`mt-1`,
+    mainButton: tw`min-h-[58px] items-center justify-center rounded-2xl bg-[#19a879] p-4 shadow-sm`,
+    nextButton: tw`bg-[#7154d9]`,
+    buttonDisabled: tw`bg-[#9ca3af] opacity-60`,
+    buttonText: tw`text-lg font-black text-white`,
+};

@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, TextInput, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import { Text, View, TouchableOpacity, ActivityIndicator, TextInput, KeyboardAvoidingView, ScrollView, Platform, useWindowDimensions } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 
-import { theme } from '../styles/theme';
+import tw from 'twrnc';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 export default function LoginScreen({ navigation }: Props) {
   const { signInAnonymously, signInWithGoogleCredential, signInWithEmail, loading } = useAuth();
+  const { width } = useWindowDimensions();
+  const isWide = width >= 760;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
@@ -169,7 +171,7 @@ export default function LoginScreen({ navigation }: Props) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <ActivityIndicator size="large" color="#4f6df5" />
       </View>
     );
   }
@@ -180,16 +182,18 @@ export default function LoginScreen({ navigation }: Props) {
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
+        <View style={[styles.page, isWide && styles.pageWide]}>
+        <View style={[styles.header, isWide && styles.headerWide]}>
           <View style={styles.logoContainer}>
-            <Text style={styles.logoEmoji}>📚</Text>
+            <Text style={styles.logoEmoji}>🦸‍♀️</Text>
           </View>
-          <Text style={styles.title}>Verbos en Inglés</Text>
-          <Text style={styles.subtitle}>Domina los verbos irregulares</Text>
+          <Text style={styles.eyebrow}>¡LISTO PARA JUGAR!</Text>
+          <Text style={styles.title}>¡Hola, héroe!</Text>
+          <Text style={styles.subtitle}>Entra y sigue aprendiendo inglés.</Text>
         </View>
 
-        <View style={styles.formCard}>
-          <Text style={styles.formTitle}>Iniciar Sesión</Text>
+        <View style={[styles.formCard, isWide && styles.formCardWide]}>
+          <Text style={styles.formTitle}>Entra a tu cuenta</Text>
 
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -230,7 +234,7 @@ export default function LoginScreen({ navigation }: Props) {
             disabled={authLoading}
           >
             {authLoading ? (
-              <ActivityIndicator color={theme.colors.white} />
+              <ActivityIndicator color="#ffffff" />
             ) : (
               <Text style={styles.buttonText}>Entrar</Text>
             )}
@@ -240,7 +244,7 @@ export default function LoginScreen({ navigation }: Props) {
             style={styles.registerLink}
             onPress={() => navigation.navigate('Register')}
           >
-            <Text style={styles.registerLinkText}>¿No tienes cuenta? <Text style={styles.registerHighlight}>Regístrate</Text></Text>
+            <Text style={styles.registerLinkText}>¿Primera vez por aquí? <Text style={styles.registerHighlight}>Crea tu cuenta</Text></Text>
           </TouchableOpacity>
 
           <View style={styles.dividerContainer}>
@@ -261,167 +265,51 @@ export default function LoginScreen({ navigation }: Props) {
               style={[styles.button, styles.anonymousButton]}
               onPress={handleAnonymousSignIn}
             >
-              <Text style={styles.anonymousButtonText}>Invitado</Text>
+              <Text style={styles.anonymousButtonText}>Probar</Text>
             </TouchableOpacity>
           </View>
+        </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  scrollContent: {
-    padding: theme.spacing.xl,
-    justifyContent: 'center',
-    minHeight: '100%',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: theme.colors.background,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  logoContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: theme.colors.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...theme.shadows.md,
-    marginBottom: 15,
-  },
-  logoEmoji: {
-    fontSize: 30,
-  },
-  title: {
-    ...theme.typography.h1,
-    color: theme.colors.text,
-    textAlign: 'center',
-  },
-  subtitle: {
-    ...theme.typography.body,
-    color: theme.colors.textSecondary,
-    textAlign: 'center',
-  },
-  formCard: {
-    backgroundColor: theme.colors.white,
-    borderRadius: theme.roundness.xl,
-    padding: theme.spacing.xl,
-    ...theme.shadows.md,
-  },
-  formTitle: {
-    ...theme.typography.h2,
-    color: theme.colors.text,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  errorText: {
-    color: theme.colors.error,
-    marginBottom: 15,
-    textAlign: 'center',
-    fontWeight: '600',
-  },
-  inputGroup: {
-    marginBottom: 15,
-  },
-  label: {
-    ...theme.typography.caption,
-    color: theme.colors.textSecondary,
-    marginBottom: 5,
-    fontWeight: '700',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.roundness.lg,
-    padding: 12,
-    fontSize: 16,
-    color: theme.colors.text,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 20,
-  },
-  forgotPasswordText: {
-    color: theme.colors.primary,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  button: {
-    paddingVertical: 14,
-    borderRadius: theme.roundness.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...theme.shadows.sm,
-  },
-  primaryButton: {
-    backgroundColor: theme.colors.primary,
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: theme.colors.white,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  registerLink: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  registerLinkText: {
-    color: theme.colors.textSecondary,
-    fontSize: 14,
-  },
-  registerHighlight: {
-    color: theme.colors.primary,
-    fontWeight: 'bold',
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 25,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: theme.colors.border,
-  },
-  dividerText: {
-    marginHorizontal: 10,
-    color: theme.colors.textLight,
-    fontSize: 12,
-  },
-  socialButtons: {
-    flexDirection: 'row',
-    gap: 15,
-  },
-  googleButton: {
-    flex: 1,
-    backgroundColor: theme.colors.white,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  googleButtonText: {
-    color: theme.colors.text,
-    fontWeight: '600',
-  },
-  anonymousButton: {
-    flex: 1,
-    backgroundColor: theme.colors.secondary,
-  },
-  anonymousButtonText: {
-    color: theme.colors.white,
-    fontWeight: '600',
-  },
-});
+const styles = {
+  container: tw`flex-1 bg-[#f5f8ff]`,
+  scrollContent: tw`min-h-full justify-center px-4 py-6`,
+  page: [tw`w-full self-center`, { maxWidth: 480 }],
+  pageWide: [tw`flex-row items-center`, { maxWidth: 940 }],
+  loadingContainer: tw`flex-1 items-center justify-center bg-[#f5f8ff]`,
+  header: tw`mb-5 items-center rounded-3xl bg-[#e7f1ff] px-5 py-5`,
+  headerWide: tw`mr-6 flex-1 px-8 py-12`,
+  logoContainer: tw`mb-2 h-[64px] w-[64px] items-center justify-center rounded-2xl bg-white`,
+  logoEmoji: tw`text-[40px]`,
+  eyebrow: tw`mt-1 text-[10px] font-black tracking-widest text-[#7046d8]`,
+  title: tw`mt-1 text-center text-[30px] font-black text-[#172554]`,
+  subtitle: tw`mt-1 text-center text-sm text-[#52617f]`,
+  formCard: tw`rounded-3xl border border-[#e7ecf6] bg-white p-5 shadow-sm`,
+  formCardWide: tw`flex-1 p-7`,
+  formTitle: tw`mb-5 text-center text-xl font-black text-[#172554]`,
+  errorText: tw`mb-4 text-center font-semibold text-[#ef4444]`,
+  inputGroup: tw`mb-4`,
+  label: tw`mb-1 text-sm font-bold text-[#4b5563]`,
+  input: tw`min-h-[52px] rounded-xl border border-[#dce4f2] bg-[#fbfcff] px-4 py-3 text-base text-[#172554]`,
+  forgotPassword: tw`mb-4 self-end px-1 py-1`,
+  forgotPasswordText: tw`text-sm font-semibold text-[#4f46e5]`,
+  button: tw`min-h-[52px] items-center justify-center rounded-xl py-3 shadow-sm`,
+  primaryButton: tw`bg-[#168f68]`,
+  buttonDisabled: tw`opacity-70`,
+  buttonText: tw`text-base font-bold text-white`,
+  registerLink: tw`mt-4 items-center py-2`,
+  registerLinkText: tw`text-sm text-[#4b5563]`,
+  registerHighlight: tw`font-bold text-[#4f46e5]`,
+  dividerContainer: tw`my-5 flex-row items-center`,
+  divider: tw`h-px flex-1 bg-[#e5e7eb]`,
+  dividerText: tw`mx-2.5 text-xs text-[#9ca3af]`,
+  socialButtons: tw`flex-row gap-3`,
+  googleButton: tw`min-h-[50px] flex-1 border border-[#dce4f2] bg-white`,
+  googleButtonText: tw`font-semibold text-[#111827]`,
+  anonymousButton: tw`min-h-[50px] flex-1 bg-[#7154d9]`,
+  anonymousButtonText: tw`font-semibold text-white`,
+};

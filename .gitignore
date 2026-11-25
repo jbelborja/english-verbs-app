@@ -31,3 +31,5 @@ my-release-key.jks
 # typescript
 *.tsbuildinfo
 
+# Keep local CLI cache files from the removed Supabase setup untracked
+supabase/.temp/
